@@ -39,8 +39,8 @@ Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produk
 
 | Nama | Peran | GitHub |
 |---|---|---|
-| **Evelly Khanzania Putri** | AI Developer | Belum dicantumkan |
-| **Dhiyaa Fazila Nugraha** | Full-Stack Developer | Belum dicantumkan |
+| **Evelly Khanzania Putri** | AI Developer | [Vkzapple](https://github.com/Vkzapple) |
+| **Dhiyaa Fazila Nugraha** | Full-Stack Developer | [fzlngh](https://github.com/fzlngh) |
 | **Raykenzie Nazaru Fathurrahmansyah** | R&D Assistant | [raykenzienazaru-dot](https://github.com/raykenzienazaru-dot) |
 
 ---
