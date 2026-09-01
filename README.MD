@@ -7,6 +7,7 @@
 Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produksi.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/raykenzienazaru-dot/PNJ)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 **Submission for ITECHNO CUP 2026 — Web Development SMA/MA/SMK**
 
@@ -470,9 +471,7 @@ Prediction harus disajikan secara transparan bersama keterbatasan model dan data
 
 ## Lisensi
 
-**[LICENSE BELUM DITENTUKAN]**
-
-Repository belum memiliki file lisensi.
+Proyek ini dilisensikan di bawah **MIT License**. Lihat file [LICENSE](LICENSE) untuk informasi selengkapnya.
 
 ---
 
