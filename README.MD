@@ -6,11 +6,9 @@
 
 Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produksi.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Belum_Tersedia-lightgrey?style=for-the-badge)](#demo--screenshot)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/raykenzienazaru-dot/PNJ)
-[![License](https://img.shields.io/badge/License-Belum_Ditentukan-lightgrey?style=for-the-badge)](#lisensi)
 
-**Submission for ITECHNO CUP 2026 — Web Development**
+**Submission for ITECHNO CUP 2026 — Web Development SMA/MA/SMK**
 
 **Tim SATORU**
 
@@ -27,11 +25,13 @@ Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produk
 - [Demo & Screenshot](#demo--screenshot)
 - [Teknologi](#teknologi)
 - [Arsitektur Sistem](#arsitektur-sistem)
+- [Dataset & AI Model](#dataset--ai-model)
 - [Instalasi & Setup](#instalasi--setup)
 - [Environment Variables](#environment-variables)
 - [Penggunaan](#penggunaan)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
+- [Security & Responsible AI](#security--responsible-ai)
 - [Lisensi](#lisensi)
 
 ---
@@ -52,6 +52,17 @@ Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produk
 
 Industri fashion dan tekstil perlu mengevaluasi banyak kandidat material sebelum produksi. Penilaian perlu mempertimbangkan karakteristik visual kain, komposisi serat, perawatan, daya tahan, dan potensi pelepasan mikroplastik secara terstruktur.
 
+FABRIX AI dirancang untuk mendukung alur evaluasi material berikut:
+
+```mermaid
+flowchart LR
+    A[Analyze] --> B[Predict]
+    B --> C[Compare]
+    C --> D[Optimize]
+    D --> E[Save]
+    E --> F[Decide]
+```
+
 ### Solusi yang Ditawarkan
 
 **FABRIX AI** adalah platform B2B *Fabric Intelligence* berbasis Artificial Intelligence. Sistem menggabungkan gambar close-up kain, komposisi serat, serta data *care/treatment* untuk memprediksi **Microplastic Shedding** dan **Fabric Durability Index (FDI)**.
@@ -66,13 +77,11 @@ Hasil analisis dapat digunakan untuk membandingkan material, menjalankan simulas
 | **Target Pengguna** | Fashion Brand, Textile Manufacturer, R&D Team, Sustainability Team, dan Procurement Team. |
 | **Value Proposition** | *Predict before you produce.* |
 
----
+### SDG Alignment
 
-## SDG Alignment
+FABRIX AI selaras dengan subtema ITECHNO CUP 2026 **“Smart Sustainable Digital Solution for Inclusive Society”** dan mendukung *Sustainable Development Goals* (SDGs) berikut tanpa mengklaim menyelesaikan seluruh targetnya.
 
-FABRIX AI diselaraskan dengan *Sustainable Development Goals* (SDGs) yang tercantum pada Guidebook Web Development ITECHNO CUP 2026. Proyek ini mendukung dan berkontribusi terhadap tujuan berikut tanpa mengklaim menyelesaikan seluruh target SDG terkait.
-
-### Primary SDG: SDG 9 — Industry, Innovation and Infrastructure
+#### Primary SDG: SDG 9 — Industry, Innovation and Infrastructure
 
 FABRIX AI mendukung inovasi industri fashion dan tekstil melalui pengembangan platform berbasis web dan Artificial Intelligence. Platform ini membantu proses analisis serta pengambilan keputusan terhadap kandidat material sebelum produksi.
 
@@ -85,7 +94,7 @@ Implementasinya mencakup:
 - **Smart Fabric Comparison**
 - **Digital Decision Support** untuk R&D tekstil
 
-### Supporting SDG: SDG 11 — Sustainable Cities and Communities
+#### Supporting SDG: SDG 11 — Sustainable Cities and Communities
 
 FABRIX AI mendukung aspek keberlanjutan melalui analisis potensi *microplastic shedding* dan optimasi kandidat material. Sistem membantu perusahaan mengevaluasi beberapa alternatif kain dan mempertimbangkan material dengan potensi dampak lingkungan yang lebih rendah sebelum proses produksi.
 
@@ -95,22 +104,26 @@ Kontribusi tersebut merupakan bentuk dukungan terhadap SDG 11 dan tidak menyatak
 
 ## Fitur Unggulan
 
+Seluruh fitur berikut masih berstatus **direncanakan/dalam pengembangan** karena source code aplikasi belum tersedia di repository.
+
 ### Fitur Utama
 
 | Fitur | Deskripsi | Keunggulan |
 |---|---|---|
-| **Multimodal Fabric Analysis** | Menggabungkan gambar kain, komposisi serat, serta data perawatan. | Memanfaatkan data visual dan tabular. |
-| **Microplastic Shedding Prediction** | Memprediksi potensi pelepasan mikroplastik. | Mendukung penyaringan awal material. |
-| **Fabric Durability Index** | Memprediksi indeks daya tahan material. | Membantu evaluasi ketahanan kain. |
-| **AI Material Optimizer** | Memberikan rekomendasi alternatif material atau parameter. | Menghasilkan rekomendasi yang dapat ditindaklanjuti. |
-| **Compare Fabrics** | Membandingkan mikroplastik, daya tahan, dan risiko beberapa kain. | Mempermudah pemilihan kandidat. |
-| **What-if Simulator** | Menjalankan analisis ulang setelah komposisi atau perlakuan diubah. | Mendukung eksplorasi skenario. |
+| **Multimodal Fabric Scanner** | Menggabungkan gambar close-up kain dan structured fabric data. | Memanfaatkan data visual dan tabular. |
+| **CNN Fabric Analyzer** | EfficientNet-B0 mengekstraksi *visual fabric features* dari gambar kain. | Menyediakan representasi visual tanpa mengklaim pengukuran fisik weave density. |
+| **Late-Fusion Prediction Engine** | Menggabungkan visual features, komposisi, struktur, dan washing condition untuk diproses XGBoost Regressor. | Mendukung prediction berbasis multimodal features. |
+| **Microplastic Shedding Prediction** | Menghasilkan prediction sesuai target dan unit pada dataset final. | Mendukung screening awal tanpa menetapkan unit yang belum diverifikasi. |
+| **Fabric Durability Index** | Menghasilkan prediction atau indikator durability berdasarkan data dan model. | Tidak menetapkan skala, kategori, atau formula sebelum implementasi final. |
+| **What-If Material Optimizer** | Menjalankan prediction scenario baru setelah parameter material diubah. | Membandingkan hasil awal dan skenario tanpa mengklaim menemukan global optimum. |
+| **Smart Fabric Comparison** | Membandingkan hasil analisis sekitar 2–5 kandidat fabric. | Membantu pengguna menentukan kandidat yang lebih sesuai tanpa pemilihan otomatis. |
 
 ### Fitur Tambahan
 
-- **Fabric Digital Passport** — menyimpan informasi dan hasil analisis material.
-- **Analysis History** — menyimpan riwayat analisis perusahaan.
-- **Export Fabric Report** — menghasilkan laporan untuk kebutuhan B2B.
+- **Fabric Digital Passport** *(Dalam Pengembangan)* — identitas digital yang dapat memuat data material dan riwayat analisis yang tersedia.
+- **Company Authentication & Dashboard** *(Dalam Pengembangan)* — akses dan ruang kerja perusahaan.
+- **Analysis History** *(Dalam Pengembangan)* — penyimpanan riwayat analisis perusahaan.
+- **Export Fabric Report** *(Planned Feature)* — pembuatan laporan untuk kebutuhan B2B.
 
 ---
 
@@ -182,7 +195,7 @@ Belum ada `package.json` atau `requirements.txt` di repository. Dependency akan 
 
 ## Arsitektur Sistem
 
-### 1. System Architecture
+### System Architecture
 
 ```mermaid
 flowchart TD
@@ -190,8 +203,10 @@ flowchart TD
     FE --> BE[Backend API]
     BE <--> DB[(Database)]
     BE --> AIS[AI Service]
-    AIS --> AIM[AI Models]
-    AIM --> AIS
+    AIS --> CNN[EfficientNet-B0]
+    AIS --> XGB[XGBoost Regressor]
+    CNN --> AIS
+    XGB --> AIS
     AIS --> BE
     BE --> FE
     FE --> U
@@ -199,7 +214,15 @@ flowchart TD
 
 Alur produksi utama adalah **Frontend → Backend → AI Service**. Frontend tidak berkomunikasi langsung dengan AI Service.
 
-### 2. End-to-End System Flow
+#### Tanggung Jawab Backend
+
+Backend direncanakan sebagai bridge/orchestrator untuk validation, business logic, data perusahaan dan kain, akses database, analysis history, Fabric Digital Passport, serta pertukaran request dan response dengan AI Service. Backend tidak menjalankan model training, EfficientNet/CNN inference, visual feature extraction, atau XGBoost inference.
+
+#### Tanggung Jawab AI Service
+
+AI Service direncanakan menangani image preprocessing, visual feature extraction, late fusion, XGBoost inference, prediction, dan pemrosesan rekomendasi. Implementasi aktual akan didokumentasikan setelah source code tersedia.
+
+### User Flow
 
 ```mermaid
 flowchart TD
@@ -216,9 +239,9 @@ flowchart TD
     I --> J[Image Preprocessing]
     J --> K[EfficientNet-B0 CNN]
     K --> L[Extract Visual Features]
-    L --> M[Weave Density / Texture Feature Vector]
-    I --> N[Process Fiber Composition]
-    I --> O[Process Care and Treatment Data]
+    L --> M[Visual Fabric Feature Vector]
+    I --> N[Process Composition and Structure]
+    I --> O[Process Washing Condition and Treatment]
 
     M --> P[Late Fusion Engine]
     N --> P
@@ -242,31 +265,34 @@ flowchart TD
     AA --> AC[(Company Analysis Database)]
 
     AB --> AD{Choose Action}
-    AD --> AE[Compare Fabrics]
-    AD --> AF[What-if Simulator]
+    AD --> AE[Smart Fabric Comparison]
+    AD --> AF[What-If Material Optimizer]
     AD --> AG[Export Fabric Report]
-    AD --> AH[Save to Analysis History]
-    AE --> AI2[Compare Microplastic, Durability and Risk]
-    AI2 --> AJ[Select Best Fabric]
-    AF --> AK[Change Fiber Composition / Treatment]
+    AD --> AH[Fabric Digital Passport]
+    AE --> AI2[Select 2-5 Fabrics and Compare Results]
+    AI2 --> AJ[Decision Support for Suitable Candidate]
+    AF --> AK[Modify Parameters and Run New Prediction]
     AK --> G
     AG --> AL[PDF / B2B Report]
-    AH --> AC
+    AH --> AH2[Save Fabric Identity and Analysis]
+    AH2 --> AC
     AJ --> AM[Decision Before Production]
     AL --> AM
-    AC --> AM
+    AC --> HIST[Analysis History]
+    HIST --> AM
     AM --> AN([End])
 ```
 
-### 3. AI Pipeline
+### AI Pipeline
 
 ```mermaid
 flowchart TD
     IMG[Fabric Image] --> PRE[Image Preprocessing]
     PRE --> CNN[EfficientNet-B0]
     CNN --> VF[Visual Features]
-    COMP[Fiber Composition] --> LF[Late Fusion]
-    CARE[Care and Treatment] --> LF
+    COMP[Fabric Composition] --> LF[Late Fusion]
+    STRUCT[Fabric Structure] --> LF
+    WASH[Washing Condition] --> LF
     VF --> LF
     LF --> XGB[XGBoost Regressor]
     XGB --> MICRO[Microplastic Shedding Prediction]
@@ -289,6 +315,46 @@ PNJ/
 ├── USER.drawio.png
 └── README.MD
 ```
+
+---
+
+## Dataset & AI Model
+
+### Dataset
+
+Dataset belum tersedia di repository. Informasi dataset akan diperbarui setelah dataset final dan pipeline preprocessing ditetapkan. Dokumentasi berikut belum dapat diverifikasi:
+
+- nama dan sumber dataset;
+- jumlah sampel;
+- fitur serta target variables;
+- unit target microplastic shedding;
+- missing values dan preprocessing;
+- pembagian train, validation, dan test.
+
+### Preprocessing
+
+Pipeline preprocessing aktual belum tersedia. Secara konseptual, gambar akan diproses sebelum visual feature extraction, sedangkan data komposisi, struktur, dan washing condition disiapkan sebagai structured fabric data untuk late fusion.
+
+### Model Architecture
+
+Arsitektur yang direncanakan menggunakan **EfficientNet-B0** untuk visual feature extraction dan **XGBoost Regressor** untuk prediction setelah late fusion. CNN tidak dinyatakan secara langsung menentukan microplastic shedding.
+
+### Model Evaluation
+
+*Model evaluation will be updated after testing on the final dataset.*
+
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Tabular Only | Belum diuji | Belum diuji | Belum diuji |
+| Visual Only | Belum diuji | Belum diuji | Belum diuji |
+| Multimodal Late Fusion | Belum diuji | Belum diuji | Belum diuji |
+
+### Model Limitations
+
+- Akurasi, confidence, unit target, dan kemampuan generalisasi belum dapat dinyatakan sebelum dataset serta hasil evaluasi tersedia.
+- FDI belum memiliki skala, kategori, formula, atau interpretasi umur pakai yang terverifikasi.
+- Hasil prediction bergantung pada kualitas dan representasi dataset final.
+- Output model digunakan sebagai decision support, bukan hasil pengujian laboratorium.
 
 ---
 
@@ -324,10 +390,12 @@ cd PNJ
 
 ## Environment Variables
 
-Environment variable aktual belum dapat ditentukan karena source code belum tersedia.
+Environment variable aktual belum dapat ditentukan karena source code belum tersedia. Nama berikut hanya menunjukkan kebutuhan konfigurasi konseptual dan harus disesuaikan dengan implementasi:
 
 ```env
-VARIABLE_NAME="your_value_here"
+NEXT_PUBLIC_API_URL="your_value_here"
+AI_SERVICE_URL="your_value_here"
+DATABASE_URL="your_value_here"
 ```
 
 Jangan menyimpan API key, password, token, atau secret asli di repository.
@@ -371,15 +439,7 @@ Endpoint akan didokumentasikan hanya setelah implementasinya tersedia.
 
 Belum terdapat source code, konfigurasi testing, atau hasil pengujian.
 
-### Model Evaluation
-
-*Model evaluation will be updated after testing on the final dataset.*
-
-| Metric | Nilai |
-|---|---|
-| MAE | Belum diuji |
-| RMSE | Belum diuji |
-| R² | Belum diuji |
+Hasil evaluasi model dicatat pada bagian [Dataset & AI Model](#dataset--ai-model) setelah eksperimen aktual tersedia.
 
 ### Software Test Coverage
 
@@ -389,6 +449,22 @@ Branches   : [BELUM DIUJI]
 Functions  : [BELUM DIUJI]
 Lines      : [BELUM DIUJI]
 ```
+
+---
+
+## Security & Responsible AI
+
+Implementasi keamanan belum dapat diverifikasi karena source code aplikasi belum tersedia. Aspek berikut akan didokumentasikan berdasarkan implementasi aktual:
+
+- input dan file upload validation;
+- authentication dan authorization perusahaan;
+- password handling;
+- API security dan perlindungan data pengguna/perusahaan;
+- penggunaan environment variables untuk konfigurasi sensitif.
+
+Prediction harus disajikan secara transparan bersama keterbatasan model dan dataset. FABRIX AI diposisikan sebagai **AI-assisted decision support**, bukan penentu keputusan otomatis.
+
+> **Disclaimer:** Hasil prediksi FABRIX AI merupakan sistem pendukung keputusan dan tidak menggantikan pengujian laboratorium material.
 
 ---
 
