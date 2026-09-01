@@ -12,7 +12,7 @@
 
 **Submission for ITECHNO CUP 2026 - Web Development**
 
-**By [NAMA TIM]**
+**By SATORU**
 
 </div>
 
@@ -656,6 +656,6 @@ Proyek ini dilisensikan di bawah **MIT License** â€” lihat file [LICENSE](L
 
 **Predict. Compare. Optimize. Decide.**
 
-**Made with â¤ï¸ by [NAMA TIM] for ITECHNO CUP 2026**
+**Made with â¤ï¸ by SATORU for ITECHNO CUP 2026**
 
 </div>
