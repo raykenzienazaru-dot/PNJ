@@ -22,6 +22,7 @@ Platform B2B berbasis AI untuk analisis awal material kain sebelum proses produk
 
 - [Tim Developer](#tim-developer)
 - [Tentang Proyek](#tentang-proyek)
+- [SDG Alignment](#sdg-alignment)
 - [Fitur Unggulan](#fitur-unggulan)
 - [Demo & Screenshot](#demo--screenshot)
 - [Teknologi](#teknologi)
@@ -64,6 +65,31 @@ Hasil analisis dapat digunakan untuk membandingkan material, menjalankan simulas
 | **Tujuan Utama** | Mendukung evaluasi dan pemilihan kandidat kain sebelum produksi melalui analisis berbasis AI. |
 | **Target Pengguna** | Fashion Brand, Textile Manufacturer, R&D Team, Sustainability Team, dan Procurement Team. |
 | **Value Proposition** | *Predict before you produce.* |
+
+---
+
+## SDG Alignment
+
+FABRIX AI diselaraskan dengan *Sustainable Development Goals* (SDGs) yang tercantum pada Guidebook Web Development ITECHNO CUP 2026. Proyek ini mendukung dan berkontribusi terhadap tujuan berikut tanpa mengklaim menyelesaikan seluruh target SDG terkait.
+
+### Primary SDG: SDG 9 — Industry, Innovation and Infrastructure
+
+FABRIX AI mendukung inovasi industri fashion dan tekstil melalui pengembangan platform berbasis web dan Artificial Intelligence. Platform ini membantu proses analisis serta pengambilan keputusan terhadap kandidat material sebelum produksi.
+
+Implementasinya mencakup:
+
+- **Multimodal Fabric Analysis**
+- **CNN Fabric Analyzer**
+- **Microplastic & Durability Prediction**
+- **What-if Material Optimizer**
+- **Smart Fabric Comparison**
+- **Digital Decision Support** untuk R&D tekstil
+
+### Supporting SDG: SDG 11 — Sustainable Cities and Communities
+
+FABRIX AI mendukung aspek keberlanjutan melalui analisis potensi *microplastic shedding* dan optimasi kandidat material. Sistem membantu perusahaan mengevaluasi beberapa alternatif kain dan mempertimbangkan material dengan potensi dampak lingkungan yang lebih rendah sebelum proses produksi.
+
+Kontribusi tersebut merupakan bentuk dukungan terhadap SDG 11 dan tidak menyatakan bahwa FABRIX AI secara langsung menyelesaikan seluruh targetnya. Klaim pengurangan mikroplastik secara kuantitatif hanya akan dicantumkan setelah tersedia hasil pengujian aktual.
 
 ---
 
@@ -378,6 +404,6 @@ Repository belum memiliki file lisensi.
 
 **Predict. Compare. Optimize.**
 
-**Made with ❤️ by SATORU for ITECHNO CUP 2026**
+**Made with by SATORU for ITECHNO CUP 2026**
 
 </div>
