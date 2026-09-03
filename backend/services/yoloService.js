@@ -4,12 +4,8 @@ const fetch = require("node-fetch");
  * ---------------------------------------------------------------------------
  * Roboflow Workflow integration
  * ---------------------------------------------------------------------------
- * This service calls the published Roboflow Workflow that mirrors the JSON
- * definition stored at backend/config/roboflow.workflow.json:
- *
- *   workspace : evelly-khanza
- *   workflow  : fabric-defect-detection_2025-tw6ok-ll8oy
- *   output    : "predictions" -> $steps.model.predictions (object detection)
+ * This service calls a published Roboflow Workflow whose URL and credential
+ * are supplied through environment variables.
  *
  * Roboflow's hosted "Run Workflow" endpoint is:
  *   POST https://<serverless-host>/infer/workflows/<workspace>/<workflow_id>
@@ -38,9 +34,7 @@ const fetch = require("node-fetch");
  * ---------------------------------------------------------------------------
  */
 
-const ROBOFLOW_API_BASE = (process.env.ROBOFLOW_API_BASE || "https://detect.roboflow.com").replace(/\/+$/, "");
-const ROBOFLOW_WORKSPACE = process.env.ROBOFLOW_WORKSPACE || "evelly-khanza";
-const ROBOFLOW_WORKFLOW_ID = process.env.ROBOFLOW_WORKFLOW_ID || "fabric-defect-detection_2025-tw6ok-ll8oy";
+const ROBOFLOW_WORKFLOW_URL = (process.env.ROBOFLOW_WORKFLOW_URL || "").trim().replace(/\/+$/, "");
 const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
 
 const ALLOW_MOCK_INFERENCE =
@@ -85,7 +79,7 @@ function humanizeClass(cls) {
 }
 
 function buildWorkflowUrl() {
-  return `${ROBOFLOW_API_BASE}/infer/workflows/${ROBOFLOW_WORKSPACE}/${ROBOFLOW_WORKFLOW_ID}`;
+  return ROBOFLOW_WORKFLOW_URL;
 }
 
 /**
@@ -123,8 +117,6 @@ function mockInference(imageBuffer) {
     source: "mock",
     model: {
       provider: "roboflow",
-      workspace: ROBOFLOW_WORKSPACE,
-      workflow_id: ROBOFLOW_WORKFLOW_ID,
     },
     image_meta: null,
     detections,
@@ -132,7 +124,7 @@ function mockInference(imageBuffer) {
       microplastic_shedding_index,
       fabric_durability_index,
       note:
-        "Nilai ini adalah hasil MOCK untuk keperluan pengembangan. Roboflow workflow belum terhubung (ROBOFLOW_API_KEY belum diset).",
+        "Nilai ini adalah hasil MOCK untuk keperluan pengembangan. Roboflow workflow belum terhubung atau belum dikonfigurasi.",
     },
     recommendation: buildRecommendation(detections),
   };
@@ -213,9 +205,9 @@ function buildRecommendation(detections) {
  * @param {Object} fabricData - structured fabric data (composition, structure, washing condition)
  */
 async function runInference(imageBuffer, fabricData = {}) {
-  if (!ROBOFLOW_API_KEY) {
+  if (!ROBOFLOW_WORKFLOW_URL || !ROBOFLOW_API_KEY) {
     if (ALLOW_MOCK_INFERENCE) return mockInference(imageBuffer);
-    throw new Error("ROBOFLOW_API_KEY is not configured");
+    throw new Error("Roboflow workflow URL or API key is not configured");
   }
 
   try {
@@ -260,8 +252,6 @@ async function runInference(imageBuffer, fabricData = {}) {
       source: "ai_service",
       model: {
         provider: "roboflow",
-        workspace: ROBOFLOW_WORKSPACE,
-        workflow_id: ROBOFLOW_WORKFLOW_ID,
       },
       image_meta: imageMeta,
       detections,
@@ -289,6 +279,4 @@ async function runInference(imageBuffer, fabricData = {}) {
 module.exports = {
   runInference,
   FABRIC_CLASSES,
-  ROBOFLOW_WORKSPACE,
-  ROBOFLOW_WORKFLOW_ID,
 };

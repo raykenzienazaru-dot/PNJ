@@ -1,5 +1,5 @@
 import type { Analysis, JsonObject } from "@/types/analysis";
-import { formatValue, hasValue, humanize } from "@/types/analysis";
+import { fabricDisplayName, formatValue, hasValue, humanize } from "@/types/analysis";
 
 const BRAND = {
   deep: [5, 31, 32] as const,
@@ -12,7 +12,7 @@ const BRAND = {
 
 async function imageAsDataUrl(url: string): Promise<string> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error("Could not load the captured image.");
+  if (!response.ok) throw new Error("Foto kain belum dapat dimuat.");
   const blob = await response.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,18 +24,18 @@ async function imageAsDataUrl(url: string): Promise<string> {
 
 function safeFilename(value: string) {
   const sanitized = value.trim().replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
-  return sanitized || "Untitled_Fabric";
+  return sanitized || "Kain_Tanpa_Nama";
 }
 
 function objectLines(value: unknown): string[] {
-  if (!hasValue(value)) return ["Not Available"];
+  if (!hasValue(value)) return ["Tidak tersedia"];
   if (Array.isArray(value)) {
     return value.flatMap((item, index) => {
       if (item && typeof item === "object") {
         const details = Object.entries(item as JsonObject).map(
           ([key, entry]) => `${humanize(key)}: ${formatValue(entry)}`
         );
-        return [`Detection ${index + 1}`, ...details];
+        return [`Deteksi ${index + 1}`, ...details];
       }
       return [formatValue(item)];
     });
@@ -63,8 +63,8 @@ export async function downloadAnalysisPdf(analysis: Analysis) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(...BRAND.muted);
-    doc.text("FABRIX AI · This report was generated from a saved fabric analysis.", margin, height - 26);
-    doc.text(`Analysis ID: ${analysis.id}`, width - margin, height - 26, { align: "right" });
+    doc.text("FABRIX AI · Laporan dibuat dari analisis kain yang telah disimpan.", margin, height - 26);
+    doc.text(`ID Analisis: ${analysis.id}`, width - margin, height - 26, { align: "right" });
   }
 
   function header(first = false) {
@@ -77,9 +77,9 @@ export async function downloadAnalysisPdf(analysis: Analysis) {
     doc.text("FABRIX AI", margin, 36);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    doc.text("Predict. Compare. Optimize.", margin, 55);
+    doc.text("Deteksi. Bandingkan. Dokumentasikan.", margin, 55);
     doc.setFontSize(13);
-    doc.text("Fabric Analysis Report", width - margin, 43, { align: "right" });
+    doc.text("Laporan Analisis Kain", width - margin, 43, { align: "right" });
     y = 112;
   }
 
@@ -139,19 +139,19 @@ export async function downloadAnalysisPdf(analysis: Analysis) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...BRAND.secondary);
-    doc.text("DEMO RESULT", margin + 10, y + 12);
+    doc.text("HASIL DEMO", margin + 10, y + 12);
     y += 38;
   }
 
-  heading("Analysis Information");
-  row("Fabric Name", analysis.fabric_name || "Untitled Fabric");
-  row("Analysis ID", analysis.id);
-  row("Analysis Date", new Date(analysis.created_at).toLocaleString("en-GB"));
-  row("Result Source", humanize(analysis.result_source || "unknown"));
+  heading("Informasi Analisis");
+  row("Nama Kain", fabricDisplayName(analysis.fabric_name));
+  row("ID Analisis", analysis.id);
+  row("Tanggal Analisis", new Date(analysis.created_at).toLocaleString("id-ID"));
+  row("Sumber Hasil", humanize(analysis.result_source || "unknown"));
   y += 8;
 
   if (analysis.image_url) {
-    heading("Captured Fabric");
+    heading("Foto Kain");
     try {
       const dataUrl = await imageAsDataUrl(analysis.image_url);
       const properties = doc.getImageProperties(dataUrl);
@@ -163,7 +163,7 @@ export async function downloadAnalysisPdf(analysis: Analysis) {
       doc.addImage(dataUrl, properties.fileType, margin, y, imageWidth, imageHeight);
       y += imageHeight + 22;
     } catch {
-      row("Image", "Captured image could not be embedded in this report.");
+      row("Gambar", "Foto kain belum dapat disertakan dalam laporan ini.");
     }
   }
 
@@ -171,29 +171,29 @@ export async function downloadAnalysisPdf(analysis: Analysis) {
     analysis.microplastic_shedding_index !== null ||
     analysis.fabric_durability_index !== null
   ) {
-    heading("Fabric Analysis");
+    heading("Analisis Kain");
     if (analysis.microplastic_shedding_index !== null) {
-      row("Microplastic Shedding Index", String(analysis.microplastic_shedding_index));
+      row("Indeks Pelepasan Mikroplastik", String(analysis.microplastic_shedding_index));
     }
     if (analysis.fabric_durability_index !== null) {
-      row("Fabric Durability Index", String(analysis.fabric_durability_index));
+      row("Indeks Ketahanan Kain", String(analysis.fabric_durability_index));
     }
     y += 8;
   }
 
-  section("Detected Characteristics", analysis.detections);
-  section("Fabric Composition", analysis.composition);
-  section("Fabric Structure", analysis.structure);
-  section("Washing Condition", analysis.washing_condition);
-  section("Recommendation", analysis.recommendation);
+  section("Karakteristik Terdeteksi", analysis.detections);
+  section("Komposisi Kain", analysis.composition);
+  section("Struktur Kain", analysis.structure);
+  section("Kondisi Pencucian", analysis.washing_condition);
+  section("Rekomendasi", analysis.recommendation);
 
   ensureSpace(48);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...BRAND.muted);
-  doc.text(`Generated: ${new Date().toLocaleString("en-GB")}`, margin, y);
+  doc.text(`Dibuat: ${new Date().toLocaleString("id-ID")}`, margin, y);
   footer();
 
   const shortId = analysis.id.split("-")[0] || analysis.id;
-  doc.save(`FABRIX_AI_${safeFilename(analysis.fabric_name)}_${safeFilename(shortId)}.pdf`);
+  doc.save(`FABRIX_AI_${safeFilename(fabricDisplayName(analysis.fabric_name))}_${safeFilename(shortId)}.pdf`);
 }

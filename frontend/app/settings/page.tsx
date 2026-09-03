@@ -33,28 +33,28 @@ export default function SettingsPage() {
         industry: industry || null,
       });
       auth.setProfile(response.profile);
-      setMessage("Profile saved.");
+      setMessage("Profil berhasil disimpan.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Profile could not be saved.");
+      setMessage(error instanceof Error ? error.message : "Profil belum dapat disimpan.");
     } finally {
       setSaving(false);
     }
   }
 
-  if (auth.loading) return <AppLoading label="Loading settings..." />;
+  if (auth.loading) return <AppLoading label="Memuat pengaturan..." />;
 
   return (
-    <AppShell title="Settings" description="Keep the company profile linked to your authenticated workspace up to date." profile={auth.profile} email={auth.session?.user.email}>
+    <AppShell title="Pengaturan" description="Perbarui profil usaha yang terhubung dengan ruang kerja Anda." profile={auth.profile} email={auth.session?.user.email}>
       <form onSubmit={save} className="max-w-2xl rounded-3xl border border-border bg-white p-6 shadow-card sm:p-8">
-        <h2 className="font-display text-2xl font-semibold text-deep">Company Profile</h2>
+        <h2 className="font-display text-2xl font-semibold text-deep">Profil Usaha</h2>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <Field label="Company / Organization" value={companyName} onChange={setCompanyName} required />
-          <Field label="Contact Name" value={contactName} onChange={setContactName} />
-          <Field label="Industry" value={industry} onChange={setIndustry} />
-          <label className="block"><span className="text-xs font-semibold text-deep">Account Email</span><input value={auth.session?.user.email || ""} readOnly className="mt-2 w-full cursor-not-allowed rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-muted" /></label>
+          <Field label="Nama usaha / organisasi" value={companyName} onChange={setCompanyName} required />
+          <Field label="Nama penanggung jawab" value={contactName} onChange={setContactName} />
+          <Field label="Bidang usaha" value={industry} onChange={setIndustry} />
+          <label className="block"><span className="text-xs font-semibold text-deep">Email akun</span><input value={auth.session?.user.email || ""} readOnly className="mt-2 w-full cursor-not-allowed rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-muted" /></label>
         </div>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <button type="submit" disabled={saving || !companyName.trim()} className="min-h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-secondary disabled:opacity-50">{saving ? "Saving..." : "Save Profile"}</button>
+          <button type="submit" disabled={saving || !companyName.trim()} className="min-h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-secondary disabled:opacity-50">{saving ? "Menyimpan..." : "Simpan Profil"}</button>
           {message && <p className="text-sm text-secondary" aria-live="polite">{message}</p>}
         </div>
       </form>

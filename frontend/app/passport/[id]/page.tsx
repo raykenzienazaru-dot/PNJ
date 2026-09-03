@@ -20,15 +20,15 @@ export default function PassportDetailPage() {
     if (!auth.session || !params.id) return;
     apiGet(`/api/scan/${params.id}`)
       .then((response) => setAnalysis(response.analysis))
-      .catch((requestError) => setError(requestError.message || "Fabric Passport could not be loaded."))
+      .catch((requestError) => setError(requestError.message || "Paspor kain belum dapat dimuat."))
       .finally(() => setLoading(false));
   }, [auth.session, params.id]);
 
-  if (auth.loading || loading) return <AppLoading label="Opening fabric passport..." />;
+  if (auth.loading || loading) return <AppLoading label="Membuka paspor kain..." />;
 
   return (
-    <AppShell title="Fabric Passport" description="A reusable view of the associated saved fabric analysis." profile={auth.profile} email={auth.session?.user.email}>
-      {analysis ? <AnalysisDetail analysis={analysis} passport onUpdated={setAnalysis} /> : <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center"><p className="text-sm text-red-700">{error || "Fabric Passport not found."}</p><Link href="/passport" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Back to Library</Link></div>}
+    <AppShell title="Paspor Kain" description="Tampilan ringkas dari analisis kain yang sudah tersimpan." profile={auth.profile} email={auth.session?.user.email}>
+      {analysis ? <AnalysisDetail analysis={analysis} passport onUpdated={setAnalysis} /> : <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center"><p className="text-sm text-red-700">{error || "Paspor kain tidak ditemukan."}</p><Link href="/passport" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Kembali ke Pustaka</Link></div>}
     </AppShell>
   );
 }

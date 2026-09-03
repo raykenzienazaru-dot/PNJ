@@ -22,6 +22,7 @@
 - [Tim Pengembang](#-tim-pengembang)
 - [Tentang Proyek](#-tentang-proyek)
 - [Fitur Unggulan](#-fitur-unggulan)
+- [Dokumentasi Tampilan](#-dokumentasi-tampilan)
 - [Teknologi](#-teknologi)
 - [Arsitektur Sistem](#-arsitektur-sistem)
 - [Struktur Database](#-struktur-database)
@@ -100,7 +101,7 @@ Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. 
 - **Autentikasi Supabase:** registrasi, login, persistensi sesi, dan keluar akun.
 - **Profil perusahaan:** nama perusahaan, penanggung jawab, industri, dan email akun.
 - **Paspor kain:** tampilan identitas dari record analisis yang sama tanpa duplikasi data.
-- **Penamaan kain:** hasil baru menggunakan nama awal `Untitled Fabric` dan dapat diubah setelah analisis.
+- **Penamaan kain:** hasil baru menggunakan nama awal `Kain tanpa nama` dan dapat diubah setelah analisis.
 - **What-If Optimizer:** pemilihan analisis dasar sudah berfungsi; parameter skenario menunggu schema input final dari layanan AI.
 - **Hasil simulasi yang transparan:** fallback pengembangan selalu diberi label `DEMO RESULT`.
 - **Indeks yang transparan:** indeks shedding dan durability dihitung menggunakan heuristik deterministik dari kelas cacat dan confidence; keduanya bukan output langsung model YOLO atau hasil uji laboratorium.
@@ -125,6 +126,21 @@ Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. 
 
 ---
 
+## 🖼 Dokumentasi Tampilan
+
+Dokumentasi tidak ditampilkan langsung di README. Gunakan tautan berikut untuk membuka setiap gambar.
+
+| Tautan Gambar | Keterangan |
+| --- | --- |
+| [Buka gambar halaman utama](Homepage.png) | Tampilan landing page FABRIX AI yang memperkenalkan analisis kain berbasis kamera, navigasi produk, serta tombol untuk memulai analisis. |
+| [Buka gambar halaman login](Login.png) | Tampilan autentikasi pengguna dengan panel identitas FABRIX AI serta formulir email dan kata sandi. |
+| [Buka gambar halaman registrasi](Regis.png) | Tampilan pendaftaran usaha dalam layout layar penuh untuk mengisi identitas pengguna, organisasi, bidang usaha, email, dan kata sandi. |
+| [Buka gambar dashboard](Dasboardutama.png) | Tampilan ringkasan ruang kerja yang memuat statistik analisis, akses cepat untuk scan kain, dan daftar hasil terbaru. |
+| [Buka gambar fitur scan kain](<Fitur utama.png>) | Tampilan fitur utama pengambilan foto kain melalui kamera, termasuk keadaan ketika izin atau akses kamera belum tersedia. |
+| [Buka contoh foto yang tidak sesuai](<Foto tidak sesuai.png>) | Contoh masukan non-kain pada halaman perbandingan. Gambar ini mendokumentasikan batasan MVP dan pentingnya memotret permukaan kain secara jelas agar hasil pemeriksaan relevan. |
+
+---
+
 ## 🛠 Teknologi
 
 ### Tech Stack
@@ -139,6 +155,8 @@ Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. 
 | Tailwind CSS | `3.4.7` | Sistem desain responsif dan palet visual FABRIX |
 | Supabase JS | `2.45.4` | Autentikasi dan pengelolaan sesi di browser |
 | jsPDF | `4.2.1` | Pembuatan dan pengunduhan laporan PDF |
+| Framer Motion | `13.2.0` | Animasi sidebar dan navigasi responsif |
+| Lucide React | `1.40.0` | Ikon antarmuka yang konsisten dan aksesibel |
 
 #### Backend dan Data
 
@@ -160,7 +178,7 @@ Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. 
 | Teknologi | Alasan |
 | --- | --- |
 | **Next.js dan React** | Cocok untuk antarmuka interaktif berbasis route serta mendukung build produksi yang teroptimasi. |
-| **TypeScript** | Mengurangi kesalahan bentuk data saat hasil analisis digunakan pada halaman detail, history, comparison, passport, dan PDF. |
+| **TypeScript** | Mengurangi kesalahan bentuk data saat hasil analisis digunakan pada halaman detail, riwayat, perbandingan, paspor, dan PDF. |
 | **Tailwind CSS** | Memudahkan konsistensi desain dan responsivitas tanpa menambah pustaka komponen besar. |
 | **Express** | Menjadi lapisan terpercaya antara browser, Supabase, dan layanan AI. |
 | **Supabase** | Menyediakan autentikasi, database PostgreSQL, dan penyimpanan gambar dalam satu layanan. |
@@ -287,8 +305,13 @@ PNJ/
 │   │   ├── scan/
 │   │   └── settings/
 │   ├── components/
+│   │   ├── AppShell.tsx
+│   │   ├── BrandLogo.tsx
+│   │   ├── CameraScanner.tsx
 │   │   └── DetectionOverlay.tsx
 │   ├── lib/
+│   ├── public/
+│   │   └── logo.png
 │   ├── types/
 │   └── package.json
 ├── supabase/
@@ -329,17 +352,37 @@ SQL tersebut juga menambahkan RLS, trigger `updated_at`, serta trigger pembuatan
 
 ### 3. Siapkan Environment
 
+Konfigurasi frontend:
+
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
+# Backend API
+NEXT_PUBLIC_API_URL=http://localhost:4000
+```
+
+Konfigurasi backend:
+
+```env
+# Server
+PORT=4000
+FRONTEND_ORIGIN=http://localhost:3000
+
+# Supabase (server only)
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
 # Roboflow
 ROBOFLOW_WORKFLOW_URL=
 ROBOFLOW_API_KEY=
+
+# Development fallback
+ALLOW_MOCK_INFERENCE=true
 ```
 
-Isi seluruh nilai hanya pada environment lokal atau secret manager platform deployment. Jangan menyertakan credential asli dalam README maupun commit Git.
+`ROBOFLOW_WORKFLOW_URL` berisi URL lengkap endpoint workflow yang telah dipublikasikan. Seluruh contoh di atas hanya menunjukkan nama variabel dan tidak memuat credential. Isi nilai sensitif hanya pada environment lokal atau secret manager platform deployment. Jangan menyertakan credential asli dalam README maupun commit Git.
 
 ### 4. Instal Dependency
 
@@ -377,14 +420,14 @@ Buka aplikasi melalui [http://localhost:3000](http://localhost:3000). Status bac
 
 1. Buka halaman utama dan pilih **Mulai Sekarang**.
 2. Daftarkan akun perusahaan atau login dengan akun yang sudah ada.
-3. Dari dashboard, pilih **Scan Fabric**.
+3. Dari dashboard, pilih **Scan Kain**.
 4. Izinkan akses kamera pada browser.
 5. Posisikan kain dekat kamera dengan cahaya cukup dan tanpa bayangan kuat.
-6. Tekan **Capture Fabric**, lalu tinjau hasil tangkapan.
-7. Pilih **Retake** jika gambar kurang jelas atau **Analyze Fabric** untuk melanjutkan.
+6. Tekan **Ambil Foto Kain**, lalu tinjau hasil tangkapan.
+7. Pilih **Ambil Ulang** jika gambar kurang jelas atau **Analisis Kain** untuk melanjutkan.
 8. Tunggu proses analisis selesai hingga halaman hasil terbuka.
-9. Ubah nama kain bila diperlukan, kemudian pilih **Save Analysis**.
-10. Gunakan **Download PDF**, **Compare**, atau **Explore What-If** sesuai kebutuhan.
+9. Ubah nama kain bila diperlukan, kemudian pilih **Simpan Analisis**.
+10. Gunakan **Unduh PDF**, **Bandingkan**, atau **Buka What-If Optimizer** sesuai kebutuhan.
 
 ### Hasil Analisis
 
@@ -408,7 +451,7 @@ PDF dibuat dari data yang sudah tersimpan pada Supabase. Pembuatan laporan:
 - tidak mengubah atau menghapus analysis;
 - menyembunyikan bagian yang tidak memiliki data;
 - menggunakan nama berkas `FABRIX_AI_[NamaKain]_[AnalysisID].pdf`;
-- dapat dijalankan dari halaman hasil, history, dan passport.
+- dapat dijalankan dari halaman hasil, riwayat, dan pustaka paspor kain.
 
 ---
 
@@ -446,7 +489,7 @@ Endpoint `/health` tidak memerlukan autentikasi.
 | Field | Tipe | Wajib | Keterangan |
 | --- | --- | --- | --- |
 | `image` | File | Ya | JPEG, PNG, atau WebP; maksimum 8 MB |
-| `fabric_name` | String | Tidak | Nilai awal `Untitled Fabric` jika kosong |
+| `fabric_name` | String | Tidak | Nilai awal `Kain tanpa nama` jika kosong |
 | `composition` | JSON/String | Tidak | Data komposisi jika tersedia |
 | `structure` | JSON/String | Tidak | Data struktur jika tersedia |
 | `washing_condition` | JSON/String | Tidak | Kondisi pencucian jika tersedia |

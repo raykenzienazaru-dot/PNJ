@@ -7,7 +7,7 @@ import type { Analysis } from "@/types/analysis";
 export default function ReportButton({
   analysis,
   compact = false,
-  label = "Download PDF",
+  label = "Unduh PDF",
 }: {
   analysis: Analysis;
   compact?: boolean;
@@ -30,11 +30,11 @@ export default function ReportButton({
 
   const text =
     status === "loading"
-      ? "Generating Report..."
+      ? "Membuat Laporan..."
       : status === "ready"
-        ? "Report Ready"
+        ? "Laporan Siap"
         : status === "error"
-          ? "Try Again"
+          ? "Coba Lagi"
           : label;
 
   return (
@@ -43,7 +43,7 @@ export default function ReportButton({
       onClick={download}
       disabled={status === "loading"}
       aria-live="polite"
-      title={status === "error" ? "We couldn't generate the analysis report." : undefined}
+      title={status === "error" ? "Laporan analisis belum dapat dibuat." : undefined}
       className={
         compact
           ? "rounded-lg border border-border bg-white px-3 py-2 text-xs font-semibold text-primary transition hover:border-primary disabled:opacity-60"

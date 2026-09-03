@@ -34,7 +34,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setStatus("error");
-      setMessage("This browser does not support camera access.");
+      setMessage("Browser ini tidak mendukung akses kamera.");
       return;
     }
 
@@ -64,8 +64,8 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
       setStatus("error");
       setMessage(
         cameraError.name === "NotAllowedError"
-          ? "Camera access is required to scan fabric. Allow camera permission in your browser and try again."
-          : "The camera could not be opened. Check that another application is not using it."
+          ? "Akses kamera diperlukan untuk scan kain. Izinkan kamera pada browser, lalu coba lagi."
+          : "Kamera tidak dapat dibuka. Pastikan kamera tidak sedang digunakan aplikasi lain."
       );
     }
   }, []);
@@ -95,7 +95,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
       (blob) => {
         if (!blob) {
           setStatus("error");
-          setMessage("The captured frame could not be prepared. Please try again.");
+          setMessage("Gambar hasil tangkapan belum dapat diproses. Silakan coba lagi.");
           return;
         }
 
@@ -144,14 +144,14 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
           }`}
           playsInline
           muted
-          aria-label="Live fabric camera preview"
+          aria-label="Pratinjau langsung kamera kain"
         />
 
         {preview && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={preview}
-            alt="Captured fabric preview"
+            alt="Pratinjau foto kain"
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
@@ -166,7 +166,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
               <div className="scan-line" />
             </div>
             <div className="absolute left-1/2 top-5 -translate-x-1/2 rounded-full bg-deep/75 px-4 py-2 text-center text-xs font-medium text-white backdrop-blur">
-              Fabric Scan Area
+              Area Scan Kain
             </div>
           </>
         )}
@@ -178,7 +178,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
                 <span className="mx-auto block h-9 w-9 animate-spin rounded-full border-2 border-white/25 border-t-sage" />
               )}
               <p className="mt-4 text-sm font-semibold text-white">
-                {status === "starting" ? "Requesting camera access..." : "Camera unavailable"}
+                {status === "starting" ? "Meminta akses kamera..." : "Kamera tidak tersedia"}
               </p>
               {message && <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-white/65">{message}</p>}
               {status === "error" && (
@@ -187,7 +187,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
                   onClick={() => void startCamera()}
                   className="mt-5 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-deep"
                 >
-                  Retry Camera Access
+                  Coba Buka Kamera Lagi
                 </button>
               )}
             </div>
@@ -200,9 +200,9 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
       <div className="p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-display text-xl font-semibold text-deep">Fabric Scanner</h2>
+            <h2 className="font-display text-xl font-semibold text-deep">Pemindai Kain</h2>
             <p className="mt-1 max-w-xl text-xs leading-5 text-muted">
-              Place the fabric close to the camera and keep the surface well lit. Avoid shadows and hold still before capture.
+              Dekatkan kain ke kamera dan gunakan pencahayaan yang cukup. Hindari bayangan dan tahan perangkat tetap stabil.
             </p>
           </div>
           {status === "captured" ? (
@@ -212,7 +212,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
               disabled={disabled}
               className="min-h-12 shrink-0 rounded-xl border border-primary px-6 text-sm font-semibold text-primary transition hover:bg-pale disabled:opacity-60"
             >
-              Retake
+              Ambil Ulang
             </button>
           ) : (
             <button
@@ -221,7 +221,7 @@ export default function CameraScanner({ onCapture, disabled = false }: Props) {
               disabled={disabled || status !== "live"}
               className="min-h-14 shrink-0 rounded-2xl bg-primary px-8 text-base font-semibold text-white shadow-lg shadow-primary/15 transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-45"
             >
-              Capture Fabric
+              Ambil Foto Kain
             </button>
           )}
         </div>

@@ -59,7 +59,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
-    // 2. Run inference via the AI Service (YOLO / EfficientNet+XGBoost late fusion)
+    // 2. Run object-detection inference through the configured Roboflow Workflow.
     const inferenceResult = await runInference(req.file.buffer, fabricData);
 
     // 3. Persist the analysis result
@@ -67,7 +67,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
       .from("fabric_analyses")
       .insert({
         user_id: req.user.id,
-        fabric_name: fabric_name || "Untitled Fabric",
+        fabric_name: fabric_name || "Kain tanpa nama",
         image_path: filePath,
         image_url: publicUrlData?.publicUrl || null,
         composition: fabricData.composition,

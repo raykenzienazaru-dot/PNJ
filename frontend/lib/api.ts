@@ -1,11 +1,12 @@
 import { supabase } from "./supabaseClient";
+import { messageInIndonesian } from "./messages";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 async function readResponse(res: Response) {
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(payload.error || "The request could not be completed.");
+    throw new Error(messageInIndonesian(payload.error));
   }
   return payload;
 }

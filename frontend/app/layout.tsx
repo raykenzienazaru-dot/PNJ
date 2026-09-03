@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   title: "FABRIX AI — Prediksi. Bandingkan. Optimalkan.",
   description:
     "Analisis kain berbasis kamera untuk mendukung keputusan material yang lebih cepat.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

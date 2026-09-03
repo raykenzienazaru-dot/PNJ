@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import BrandLogo from "@/components/BrandLogo";
 
 const steps = [
   ["01", "Arahkan", "Buka kamera dan posisikan kain di dalam bingkai pemindaian."],
@@ -141,7 +142,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-border bg-white px-5 py-8 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col justify-between gap-3 text-xs text-muted sm:flex-row">
-          <span className="font-semibold text-deep">FABRIX AI · Prediksi. Bandingkan. Optimalkan.</span>
+          <span className="flex items-center gap-3 font-semibold text-deep"><BrandLogo variant="dark" /> <span className="hidden sm:inline">Prediksi. Bandingkan. Optimalkan.</span></span>
           <span>© 2026 FABRIX AI · Dibuat untuk ITECHNO CUP 2026</span>
         </div>
       </footer>

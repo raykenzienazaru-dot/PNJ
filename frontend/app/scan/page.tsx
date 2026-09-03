@@ -8,10 +8,10 @@ import { apiPostForm } from "@/lib/api";
 import { useAppSession } from "@/lib/useAppSession";
 
 const processingSteps = [
-  "Preparing image",
-  "Detecting visual features",
-  "Running material analysis",
-  "Preparing result",
+  "Menyiapkan gambar",
+  "Mendeteksi karakteristik visual",
+  "Menjalankan analisis kain",
+  "Menyiapkan hasil",
 ];
 
 export default function ScanPage() {
@@ -40,11 +40,11 @@ export default function ScanPage() {
     try {
       const form = new FormData();
       form.append("image", imageFile);
-      form.append("fabric_name", "Untitled Fabric");
+      form.append("fabric_name", "Kain tanpa nama");
       const response = await apiPostForm("/api/scan", form);
       router.push(`/analysis/${response.analysis.id}`);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Analysis could not be completed.");
+      setError(requestError instanceof Error ? requestError.message : "Analisis belum dapat diselesaikan.");
       setProcessing(false);
     } finally {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -58,12 +58,12 @@ export default function ScanPage() {
     setCameraKey((current) => current + 1);
   }
 
-  if (auth.loading) return <AppLoading label="Preparing camera..." />;
+  if (auth.loading) return <AppLoading label="Menyiapkan kamera..." />;
 
   return (
     <AppShell
-      title="Scan Fabric"
-      description="Position the material inside the frame, capture one clear image, and analyze it immediately."
+      title="Scan Kain"
+      description="Posisikan kain di dalam bingkai, ambil satu foto yang jelas, lalu analisis langsung."
       profile={auth.profile}
       email={auth.session?.user.email}
     >
@@ -73,22 +73,22 @@ export default function ScanPage() {
         {imageFile && !processing && (
           <div className="mt-5 rounded-2xl border border-sage bg-pale/60 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
             <div>
-              <p className="font-semibold text-deep">Capture ready</p>
-              <p className="mt-1 text-xs leading-5 text-muted">Review the image above. Retake it if the texture is blurred or poorly lit.</p>
+              <p className="font-semibold text-deep">Foto siap dianalisis</p>
+              <p className="mt-1 text-xs leading-5 text-muted">Periksa foto di atas. Ambil ulang jika tekstur buram atau pencahayaannya kurang baik.</p>
             </div>
             <button type="button" onClick={analyze} className="mt-4 min-h-12 w-full rounded-xl bg-primary px-7 text-sm font-semibold text-white transition hover:bg-secondary sm:mt-0 sm:w-auto">
-              Analyze Fabric
+              Analisis Kain
             </button>
           </div>
         )}
 
         {error && !processing && (
           <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5" role="alert">
-            <h2 className="font-display text-xl font-semibold text-red-900">Analysis could not be completed.</h2>
+            <h2 className="font-display text-xl font-semibold text-red-900">Analisis belum dapat diselesaikan.</h2>
             <p className="mt-2 text-sm text-red-700">{error}</p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <button type="button" onClick={analyze} disabled={!imageFile} className="min-h-11 rounded-xl bg-red-700 px-5 text-sm font-semibold text-white disabled:opacity-50">Try Again</button>
-              <button type="button" onClick={retakeAfterError} className="min-h-11 rounded-xl border border-red-300 px-5 text-sm font-semibold text-red-800">Retake</button>
+              <button type="button" onClick={analyze} disabled={!imageFile} className="min-h-11 rounded-xl bg-red-700 px-5 text-sm font-semibold text-white disabled:opacity-50">Coba Lagi</button>
+              <button type="button" onClick={retakeAfterError} className="min-h-11 rounded-xl border border-red-300 px-5 text-sm font-semibold text-red-800">Ambil Ulang</button>
             </div>
           </div>
         )}
@@ -101,7 +101,7 @@ export default function ScanPage() {
               <span className="absolute inset-2 animate-spin rounded-full border-2 border-sage/20 border-t-sage" />
               <span className="absolute inset-7 rounded-full bg-sage" />
             </div>
-            <h2 className="mt-7 font-display text-3xl font-semibold">Analyzing Fabric...</h2>
+            <h2 className="mt-7 font-display text-3xl font-semibold">Menganalisis Kain...</h2>
             <div className="mt-7 space-y-3 text-left">
               {processingSteps.map((step, index) => (
                 <div key={step} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${index === processingStep ? "bg-white/10 text-white" : index < processingStep ? "text-sage" : "text-white/35"}`}>

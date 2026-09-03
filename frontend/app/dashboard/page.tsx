@@ -20,7 +20,7 @@ export default function DashboardPage() {
     if (!auth.session) return;
     apiGet("/api/scan/history")
       .then((response) => setAnalyses(response.analyses || []))
-      .catch((requestError) => setError(requestError.message || "Dashboard data could not be loaded."))
+      .catch((requestError) => setError(requestError.message || "Data ringkasan belum dapat dimuat."))
       .finally(() => setLoading(false));
   }, [auth.session]);
 
@@ -28,9 +28,9 @@ export default function DashboardPage() {
     const recent = analyses.filter((item) => new Date(item.created_at).getTime() >= RECENT_CUTOFF).length;
     const saved = new Set(analyses.map((item) => item.fabric_name.trim().toLowerCase())).size;
     return [
-      ["Total Analyses", analyses.length],
-      ["Recent Analyses", recent],
-      ["Saved Fabrics", saved],
+      ["Total analisis", analyses.length],
+      ["Analisis 7 hari terakhir", recent],
+      ["Kain tersimpan", saved],
     ] as const;
   }, [analyses]);
 
@@ -38,11 +38,11 @@ export default function DashboardPage() {
 
   return (
     <AppShell
-      title="Make smarter material decisions."
-      description="Capture a fabric, review the available analysis, and keep every result ready for your next decision."
+      title="Ambil keputusan kain dengan lebih yakin."
+      description="Foto kain, periksa hasil deteksi, dan simpan setiap analisis untuk keputusan berikutnya."
       profile={auth.profile}
       email={auth.session?.user.email}
-      action={<Link href="/scan" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-white transition hover:bg-secondary">Scan Fabric</Link>}
+      action={<Link href="/scan" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-white transition hover:bg-secondary">Scan Kain</Link>}
     >
       {error && <p role="alert" className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</p>}
 
@@ -58,21 +58,21 @@ export default function DashboardPage() {
       <section className="mt-8 rounded-3xl bg-deep p-6 text-white shadow-card sm:p-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-sage">Primary workflow</p>
-            <h2 className="mt-3 font-display text-3xl font-semibold">Open camera. Capture fabric. Get insight.</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-white/60">No multi-step form and no manual upload. FABRIX opens directly into a guided camera experience.</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-sage">Alur utama</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold">Buka kamera, foto kain, lalu periksa hasilnya.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white/60">Tanpa formulir panjang atau unggah manual. FABRIX langsung memandu proses pengambilan foto kain.</p>
           </div>
-          <Link href="/scan" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-deep transition hover:bg-pale">Start New Scan</Link>
+          <Link href="/scan" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-deep transition hover:bg-pale">Mulai Scan Baru</Link>
         </div>
       </section>
 
       <section className="mt-10">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-deep">Recent Analyses</h2>
-            <p className="mt-1 text-sm text-muted">Your latest saved material results.</p>
+            <h2 className="font-display text-2xl font-semibold text-deep">Analisis Terbaru</h2>
+            <p className="mt-1 text-sm text-muted">Hasil pemeriksaan kain yang terakhir disimpan.</p>
           </div>
-          <Link href="/history" className="text-sm font-semibold text-primary">View all</Link>
+          <Link href="/history" className="text-sm font-semibold text-primary">Lihat semua</Link>
         </div>
 
         {loading ? (
@@ -85,9 +85,9 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="mt-5 rounded-2xl border border-dashed border-sage bg-white p-10 text-center">
-            <h3 className="font-display text-2xl font-semibold text-deep">No analyses yet.</h3>
-            <p className="mt-2 text-sm text-muted">Your first saved result will appear here.</p>
-            <Link href="/scan" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Analyze Your First Fabric</Link>
+            <h3 className="font-display text-2xl font-semibold text-deep">Belum ada hasil analisis.</h3>
+            <p className="mt-2 text-sm text-muted">Hasil pertama yang disimpan akan muncul di sini.</p>
+            <Link href="/scan" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Scan Kain Pertama</Link>
           </div>
         )}
       </section>
