@@ -62,3 +62,29 @@ export function analysisDetectionLabel(analysis: Analysis): string | null {
   const label = (first as JsonObject).class ?? (first as JsonObject).label;
   return typeof label === "string" ? humanize(label) : null;
 }
+
+export type DetectionSummary = {
+  class: string;
+  confidence: number | null;
+};
+
+/** Normalizes the Roboflow "predictions" array into a simple {class, confidence}[] list. */
+export function analysisDetectionSummaries(analysis: Analysis): DetectionSummary[] {
+  const detections = analysis.detections;
+  if (!Array.isArray(detections)) return [];
+  return detections
+    .filter((item): item is JsonObject => Boolean(item) && typeof item === "object")
+    .map((item) => ({
+      class: typeof item.class === "string" ? item.class : humanize(String(item.class ?? "unknown")),
+      confidence: typeof item.confidence === "number" ? item.confidence : null,
+    }));
+}
+
+/** Reads the original image dimensions Roboflow ran inference against, if present. */
+export function analysisImageMeta(analysis: Analysis): { width?: number; height?: number } | null {
+  const raw = analysis.raw_result;
+  if (!raw || typeof raw !== "object") return null;
+  const meta = (raw as JsonObject).image_meta;
+  if (!meta || typeof meta !== "object") return null;
+  return meta as { width?: number; height?: number };
+}

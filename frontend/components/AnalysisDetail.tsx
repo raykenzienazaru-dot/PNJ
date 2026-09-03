@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { apiPatchJson } from "@/lib/api";
 import type { Analysis, JsonObject } from "@/types/analysis";
-import { formatValue, hasValue, humanize } from "@/types/analysis";
+import {
+  analysisDetectionSummaries,
+  analysisImageMeta,
+  formatValue,
+  hasValue,
+  humanize,
+} from "@/types/analysis";
+import DetectionOverlay from "./DetectionOverlay";
 import ReportButton from "./ReportButton";
 
 export default function AnalysisDetail({
@@ -19,6 +26,8 @@ export default function AnalysisDetail({
   const [name, setName] = useState(analysis.fabric_name);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const detections = analysisDetectionSummaries(analysis);
+  const imageMeta = analysisImageMeta(analysis);
 
   async function saveName() {
     const nextName = name.trim() || "Untitled Fabric";
@@ -53,11 +62,11 @@ export default function AnalysisDetail({
         <div className="overflow-hidden rounded-3xl border border-border bg-white shadow-card">
           <div className="aspect-[4/3] bg-surface2">
             {analysis.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <DetectionOverlay
                 src={analysis.image_url}
                 alt={`Captured ${analysis.fabric_name}`}
-                className="h-full w-full object-cover"
+                detections={analysis.detections}
+                imageMeta={imageMeta}
               />
             ) : (
               <div className="grid h-full place-items-center text-sm text-muted">Captured image unavailable</div>
@@ -131,13 +140,45 @@ export default function AnalysisDetail({
       </section>
 
       <section className="grid gap-5 md:grid-cols-2">
-        <DataSection title="Detected Characteristics" value={analysis.detections} />
+        <DetectedDefectsSection detections={detections} />
         <DataSection title="Recommendation" value={analysis.recommendation} />
         <DataSection title="Fabric Composition" value={analysis.composition} />
         <DataSection title="Fabric Structure" value={analysis.structure} />
         <DataSection title="Washing Condition" value={analysis.washing_condition} />
       </section>
     </div>
+  );
+}
+
+function DetectedDefectsSection({
+  detections,
+}: {
+  detections: { class: string; confidence: number | null }[];
+}) {
+  return (
+    <article className="rounded-2xl border border-border bg-white p-6 shadow-card">
+      <h2 className="font-display text-xl font-semibold text-deep">Detected Defects</h2>
+      {detections.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">No defects were detected on this fabric.</p>
+      ) : (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {detections.map((detection, index) => (
+            <li
+              key={`${detection.class}-${index}`}
+              className="flex items-center gap-2 rounded-full border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-deep"
+            >
+              <span className="h-2 w-2 rounded-full bg-primary" />
+              {humanize(detection.class)}
+              {detection.confidence !== null && (
+                <span className="font-mono text-[10px] text-muted">
+                  {Math.round(detection.confidence * 100)}%
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </article>
   );
 }
 
