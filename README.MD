@@ -138,6 +138,7 @@ Dokumentasi tidak ditampilkan langsung di README. Gunakan tautan berikut untuk m
 | [Buka gambar dashboard](Dasboardutama.png) | Tampilan ringkasan ruang kerja yang memuat statistik analisis, akses cepat untuk scan kain, dan daftar hasil terbaru. |
 | [Buka gambar fitur scan kain](<Fitur utama.png>) | Tampilan fitur utama pengambilan foto kain melalui kamera, termasuk keadaan ketika izin atau akses kamera belum tersedia. |
 | [Buka contoh foto yang tidak sesuai](<Foto tidak sesuai.png>) | Contoh masukan non-kain pada halaman perbandingan. Gambar ini mendokumentasikan batasan MVP dan pentingnya memotret permukaan kain secara jelas agar hasil pemeriksaan relevan. |
+| [Buka tampilan pengujian AI](<TampilanTraining AI.jpeg>) | Tampilan pengujian dan visualisasi model di Roboflow setelah pelatihan, yang memperlihatkan deteksi cacat kelas `hole`, bounding box, confidence, serta keluaran prediksi pada test set. |
 
 ---
 
