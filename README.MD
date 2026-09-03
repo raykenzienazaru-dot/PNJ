@@ -2,7 +2,7 @@
 
 # FABRIX AI
 
-### Pahami kain sebelum diproduksi.
+### Temukan cacat kain sebelum dipotong.
 
 [![Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/raykenzienazaru-dot/PNJ)
 [![Lisensi](https://img.shields.io/badge/Lisensi-MIT-235347?style=for-the-badge)](LICENSE)
@@ -50,25 +50,33 @@
 
 ### Latar Belakang
 
-Tim riset, merek fesyen, produsen tekstil, dan bagian pengadaan perlu mengevaluasi banyak kandidat kain sebelum produksi. Informasi visual, komposisi, struktur, kondisi perawatan, daya tahan, dan potensi pelepasan mikroplastik sering tersebar pada proses yang berbeda sehingga pemeriksaan awal memerlukan waktu lebih lama.
+Konveksi dan UMKM tekstil umumnya masih memeriksa kualitas kain secara manual dengan mengandalkan pengamatan mata. Cara ini rawan human error, terutama ketika kain tersedia dalam gulungan panjang dan harus diperiksa dalam jumlah besar.
 
-FABRIX AI dikembangkan sebagai alat bantu pemeriksaan awal material. Aplikasi ini tidak menggantikan pengujian laboratorium, sertifikasi, atau keputusan tenaga ahli.
+Masalah yang ingin dibantu oleh FABRIX AI meliputi:
+
+- cacat seperti lubang, noda, sobekan, benang tertarik, dan cacat tenun dapat terlewat saat pemeriksaan visual;
+- banyak konveksi dan UMKM tidak memiliki alat khusus atau akses ke laboratorium uji fisik;
+- cacat yang baru ditemukan setelah kain dipotong atau dijahit menyebabkan bahan sulit digunakan kembali dan meningkatkan kerugian;
+- komplain kepada supplier sulit dilakukan jika tidak disertai gambar, lokasi cacat, dan hasil pemeriksaan yang terdokumentasi dengan jelas.
+
+FABRIX AI dikembangkan sebagai alat bantu pemeriksaan awal dan dokumentasi quality control. Aplikasi ini tidak menggantikan pemeriksaan menyeluruh oleh petugas QC, pengujian laboratorium, sertifikasi, atau keputusan tenaga ahli.
 
 ### Solusi yang Ditawarkan
 
-FABRIX AI menyediakan alur utama berbasis kamera:
+FABRIX AI MVP menyediakan alur pemeriksaan berbasis foto agar cacat dapat ditemukan sebelum kain dipotong atau dijahit:
 
 ```text
-Arahkan kamera → Ambil gambar → Analisis → Tinjau hasil → Simpan → Bandingkan atau unduh PDF
+Periksa bagian kain → Ambil foto → Deteksi cacat → Tinjau area yang ditandai → Simpan bukti → Unduh laporan
 ```
 
-Pengguna tidak perlu mengunggah berkas secara manual atau mengisi formulir bertahap sebelum analisis. Gambar dari kamera dikirim ke backend, diteruskan ke layanan AI, disimpan di Supabase, lalu ditampilkan kembali sebagai hasil yang dapat digunakan ulang.
+Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. Hasilnya menandai area yang diduga cacat menggunakan bounding box, kelas cacat, dan confidence. Foto serta hasil pemeriksaan disimpan di Supabase agar dapat ditinjau kembali dan digunakan sebagai dokumentasi awal saat berdiskusi atau mengajukan komplain kepada supplier.
 
 ### Tujuan Proyek
 
-- **Tujuan utama:** membantu pemeriksaan awal kandidat kain sebelum proses produksi.
-- **Target pengguna:** tim riset tekstil, merek fesyen, produsen, tim material, tim keberlanjutan, dan pengadaan.
-- **Nilai utama:** alur kamera yang singkat, hasil tersimpan, perbandingan material, paspor kain, dan laporan PDF dalam satu ruang kerja.
+- **Tujuan utama:** membantu konveksi dan UMKM menemukan indikasi cacat kain sebelum bahan dipotong atau dijahit.
+- **Target pengguna:** pemilik konveksi, pelaku UMKM tekstil, operator quality control, bagian produksi, bagian pembelian, dan penerima bahan dari supplier.
+- **Nilai utama:** pemeriksaan berbasis foto yang cepat, penandaan lokasi cacat, riwayat hasil, dan laporan yang dapat menjadi bukti dokumentasi awal.
+- **Batas MVP:** pemeriksaan dilakukan pada bagian kain yang difoto; aplikasi belum menggantikan mesin inspeksi gulungan kain secara kontinu.
 - **Arah SDG:** mendukung inovasi industri pada SDG 9 serta evaluasi material yang lebih bertanggung jawab dalam konteks SDG 11, tanpa mengklaim pencapaian target SDG secara langsung.
 
 ---
@@ -79,12 +87,13 @@ Pengguna tidak perlu mengunggah berkas secara manual atau mengisi formulir berta
 
 | Fitur | Implementasi | Keunggulan |
 | --- | --- | --- |
-| **Pemindai Kain Berbasis Kamera** | Meminta izin kamera saat halaman scan dibuka, memprioritaskan kamera belakang pada perangkat seluler, serta menyediakan bingkai panduan, ambil ulang, dan penanganan error. | Alur demonstrasi singkat tanpa unggah manual. |
-| **Integrasi Analisis AI** | Frontend mengirim hasil tangkapan ke backend; backend meneruskannya ke layanan AI yang dikonfigurasi melalui environment variable. | Model dan credential server tidak ditempatkan di browser. |
+| **Pemindai Kain Berbasis Kamera** | Meminta izin kamera saat halaman scan dibuka, memprioritaskan kamera belakang pada perangkat seluler, serta menyediakan bingkai panduan, ambil ulang, dan penanganan error. | Memudahkan pemeriksaan bagian kain sebelum proses potong dan jahit. |
+| **Deteksi Cacat dengan YOLO melalui Roboflow** | Frontend mengirim foto ke backend; adapter server meneruskan gambar sebagai base64 ke Roboflow Workflow untuk mendeteksi indikasi cacat kain. | Membantu mengurangi cacat yang terlewat pada pemeriksaan visual manual. |
+| **Visualisasi Area Cacat** | Hasil deteksi berupa kelas, confidence, dan koordinat bounding box digambar di atas gambar kain. | Operator dapat melihat lokasi yang perlu diperiksa ulang secara langsung. |
 | **Hasil Analisis Tersimpan** | Gambar disimpan pada Supabase Storage dan hasil disimpan pada tabel `fabric_analyses`. | Hasil dapat dibuka kembali tanpa menjalankan model ulang. |
-| **Riwayat Analisis** | Menampilkan analisis milik pengguna yang sedang login, diurutkan dari data terbaru. | Setiap pengguna hanya melihat datanya sendiri. |
+| **Riwayat Analisis** | Menampilkan analisis milik pengguna yang sedang login, diurutkan dari data terbaru. | Menyediakan jejak pemeriksaan dan bukti visual yang dapat ditinjau kembali. |
 | **Perbandingan Kain** | Membandingkan 2–3 hasil tersimpan, termasuk gambar, indeks yang tersedia, dan karakteristik terdeteksi. | Tidak menentukan pemenang otomatis tanpa logika pemeringkatan yang tervalidasi. |
-| **Laporan PDF** | Membuat PDF bermerek FABRIX AI dari data analisis yang telah tersimpan. | Tidak memanggil ulang layanan AI dan tidak mengarang nilai yang kosong. |
+| **Laporan PDF** | Membuat PDF bermerek FABRIX AI dari data analisis yang telah tersimpan. | Dapat digunakan sebagai dokumentasi awal pemeriksaan dan pendukung komunikasi dengan supplier. |
 
 ### Fitur Pendukung
 
@@ -94,6 +103,7 @@ Pengguna tidak perlu mengunggah berkas secara manual atau mengisi formulir berta
 - **Penamaan kain:** hasil baru menggunakan nama awal `Untitled Fabric` dan dapat diubah setelah analisis.
 - **What-If Optimizer:** pemilihan analisis dasar sudah berfungsi; parameter skenario menunggu schema input final dari layanan AI.
 - **Hasil simulasi yang transparan:** fallback pengembangan selalu diberi label `DEMO RESULT`.
+- **Indeks yang transparan:** indeks shedding dan durability dihitung menggunakan heuristik deterministik dari kelas cacat dan confidence; keduanya bukan output langsung model YOLO atau hasil uji laboratorium.
 - **Responsif:** antarmuka disiapkan untuk desktop, tablet, dan perangkat seluler.
 
 ### Rute Aplikasi
@@ -142,7 +152,8 @@ Pengguna tidak perlu mengunggah berkas secara manual atau mengisi formulir berta
 | CORS | `2.8.5` | Pembatasan origin frontend |
 | Morgan | `1.10.0` | Log permintaan saat pengembangan |
 | node-fetch | `2.7.0` | Komunikasi backend dengan layanan AI |
-| Adapter YOLO | Service backend | Menghubungkan gambar kain dari backend dengan server inference eksternal |
+| Roboflow Workflow | Hosted inference | Menjalankan workflow `fabric-defect-detection_2025-tw6ok-ll8oy` dan mengembalikan prediksi objek |
+| Adapter YOLO | Service backend | Mengubah gambar ke base64, memanggil Roboflow, menormalisasi prediksi, dan menyiapkan fallback mock |
 
 ### Alasan Pemilihan Teknologi
 
@@ -153,7 +164,7 @@ Pengguna tidak perlu mengunggah berkas secara manual atau mengisi formulir berta
 | **Tailwind CSS** | Memudahkan konsistensi desain dan responsivitas tanpa menambah pustaka komponen besar. |
 | **Express** | Menjadi lapisan terpercaya antara browser, Supabase, dan layanan AI. |
 | **Supabase** | Menyediakan autentikasi, database PostgreSQL, dan penyimpanan gambar dalam satu layanan. |
-| **YOLO** | Digunakan sebagai layanan deteksi visual eksternal agar proses inference tidak dijalankan di browser. |
+| **YOLO dan Roboflow** | Deteksi cacat dijalankan melalui workflow terkelola sehingga proses inference dan kredensial tetap berada di sisi server. |
 | **jsPDF** | Menghasilkan laporan langsung dari data tersimpan tanpa membutuhkan proses AI baru. |
 
 Deployment produksi, CI/CD, monitoring, dan test runner otomatis belum dikonfigurasi pada repository ini.
@@ -166,42 +177,55 @@ Deployment produksi, CI/CD, monitoring, dan test runner otomatis belum dikonfigu
 flowchart LR
     U[Pengguna] --> FE[Frontend Next.js]
     FE --> AUTH[Supabase Auth]
-    FE -->|Bearer token + gambar| BE[Backend Express]
+    FE -->|sesi terautentikasi + gambar| BE[Backend Express]
     BE -->|Verifikasi sesi| AUTH
-    BE --> YOLO[Layanan YOLO /predict]
-    YOLO --> BE
+    BE -->|gambar base64| RF[Roboflow Workflow API]
+    RF --> YOLO[Model deteksi cacat kain / YOLO]
+    YOLO -->|kelas, confidence, bounding box| RF
+    RF --> BE
     BE --> DB[(Supabase PostgreSQL)]
     BE --> ST[(Supabase Storage)]
     BE --> FE
     FE --> PDF[Laporan PDF]
-    YOLO -. tidak tersedia .-> MOCK[Fallback mock berlabel demo]
+    RF -. gagal atau belum dikonfigurasi .-> MOCK[Fallback mock berlabel demo]
     MOCK --> BE
 ```
 
-### Fungsi YOLO dalam FABRIX AI
+### Fungsi YOLO dan Roboflow dalam FABRIX AI
 
-YOLO berfungsi sebagai layanan analisis visual yang menerima gambar kain dari backend. Integrasi ini ditempatkan di sisi server agar model, API key, dan proses inference tidak terekspos ke browser pengguna.
+Dalam MVP FABRIX AI, fungsi utama YOLO adalah membantu quality control awal dengan mendeteksi dan menunjukkan lokasi indikasi cacat pada foto kain. Contohnya mencakup lubang, noda, sobekan, pilling, benang tertarik, perubahan warna, atau kelas cacat lain yang dikenali oleh model. Tujuannya bukan menggantikan keputusan operator, tetapi mengarahkan perhatian operator ke area yang perlu diperiksa ulang sebelum kain dipotong atau dijahit.
+
+Model diakses melalui Roboflow Workflow, sedangkan [`backend/services/yoloService.js`](backend/services/yoloService.js) menjadi adapter antara backend FABRIX AI dan layanan tersebut. Repository hanya menyimpan kode integrasi dan ringkasan alur; definisi JSON workflow lengkap, token, dan credential layanan tidak disertakan.
+
+Adapter membaca identitas workspace dan workflow dari environment backend, mengirim input gambar, lalu mengambil output `predictions` tanpa mengekspos konfigurasi privat ke frontend.
 
 Alurnya adalah sebagai berikut:
 
 1. Kamera frontend menghasilkan gambar kain.
 2. Backend menerima dan memvalidasi gambar.
-3. Adapter [`backend/services/yoloService.js`](backend/services/yoloService.js) mengirim gambar ke endpoint YOLO yang dikonfigurasi.
-4. Response YOLO diteruskan ke proses penyimpanan analysis bersama hasil lain yang tersedia.
-5. Jika service tidak dapat dihubungi dan `ALLOW_MOCK_INFERENCE=true`, backend memakai fallback pengembangan dengan `result_source: "mock"`.
+3. Adapter mengubah gambar menjadi base64 dan mengirimnya ke endpoint Roboflow Workflow menggunakan `ROBOFLOW_API_KEY`.
+4. Respons Roboflow dinormalisasi menjadi daftar deteksi berisi `class`, `class_id`, `confidence`, `x`, `y`, `width`, `height`, dan `detection_id`.
+5. Backend menghitung `microplastic_shedding_index` dan `fabric_durability_index` menggunakan bobot heuristik dari kelas cacat dan confidence.
+6. Deteksi, indeks, rekomendasi, metadata gambar, identitas workflow, dan respons mentah disimpan pada record analysis.
+7. Frontend menggunakan [`frontend/components/DetectionOverlay.tsx`](frontend/components/DetectionOverlay.tsx) untuk menggambar bounding box dan label confidence di atas gambar hasil scan.
+8. Jika API key tidak tersedia atau request gagal dan `ALLOW_MOCK_INFERENCE=true`, backend memakai fallback pengembangan dengan `result_source: "mock"`.
 
-Repository ini berisi adapter integrasi YOLO, tetapi belum menyertakan server Python atau file model YOLO. Karena itu, hasil fallback harus selalu dianggap sebagai data demonstrasi dan bukan hasil model tervalidasi.
+Output utama YOLO untuk fungsi quality control adalah kelas cacat, confidence, dan bounding box. `microplastic_shedding_index` serta `fabric_durability_index` bukan output langsung model YOLO; keduanya adalah fitur pendukung eksperimental yang dihitung menggunakan heuristik backend.
+
+Repository ini tidak menyertakan server Python atau bobot model YOLO karena inference dijalankan oleh Roboflow. Hasil dengan `result_source: "ai_service"` berasal dari workflow Roboflow, sedangkan hasil dengan `result_source: "mock"` hanya data demonstrasi. Semua indikasi cacat perlu dikonfirmasi kembali oleh operator QC.
+
+Referensi integrasi tersedia pada [dokumentasi deployment Roboflow Workflow](https://docs.roboflow.com/workflows/deploy-a-workflow).
 
 ### Alur Scan
 
 1. Browser meminta izin kamera melalui `navigator.mediaDevices.getUserMedia()`.
 2. Frame video digambar ke canvas dan diubah menjadi berkas JPEG.
-3. Frontend mengirim gambar dan access token ke `POST /api/scan`.
+3. Frontend mengirim gambar melalui sesi pengguna yang sudah terautentikasi ke `POST /api/scan`.
 4. Backend memverifikasi token melalui Supabase Auth.
 5. Backend menyimpan gambar ke bucket `fabric-images` menggunakan path `user_id/nama-file`.
-6. Backend memanggil layanan analisis yang telah dikonfigurasi.
-7. Hasil disimpan pada `fabric_analyses` dan dikembalikan ke frontend.
-8. Frontend membuka `/analysis/[id]` untuk menampilkan hasil yang tersimpan.
+6. Backend memanggil Roboflow Workflow melalui adapter YOLO.
+7. Hasil deteksi, indeks heuristik, metadata gambar, dan sumber hasil disimpan pada `fabric_analyses`.
+8. Frontend membuka `/analysis/[id]` dan menggambar bounding box pada gambar yang tersimpan.
 
 Frontend tidak memuat model AI dan tidak memiliki service-role key.
 
@@ -261,7 +285,6 @@ PNJ/
 │   ├── services/
 │   │   ├── supabaseClient.js
 │   │   └── yoloService.js
-│   ├── .env.example
 │   ├── package.json
 │   └── server.js
 ├── frontend/
@@ -277,9 +300,9 @@ PNJ/
 │   │   ├── scan/
 │   │   └── settings/
 │   ├── components/
+│   │   └── DetectionOverlay.tsx
 │   ├── lib/
 │   ├── types/
-│   ├── .env.local.example
 │   └── package.json
 ├── supabase/
 │   └── schema.sql
@@ -298,7 +321,7 @@ PNJ/
 - npm
 - Proyek Supabase
 - Browser dengan dukungan kamera
-- Layanan AI yang kompatibel jika ingin menggunakan inference asli
+- Akun Roboflow dan private API key jika ingin menggunakan inference asli
 
 > Kamera browser dapat digunakan melalui `localhost` saat pengembangan. Deployment produksi harus menggunakan HTTPS.
 
@@ -319,38 +342,31 @@ SQL tersebut juga menambahkan RLS, trigger `updated_at`, serta trigger pembuatan
 
 ### 3. Siapkan Environment Frontend
 
-```powershell
-Copy-Item frontend/.env.local.example frontend/.env.local
-```
+Konfigurasikan variabel berikut melalui environment lokal atau secret manager pada platform deployment. Jangan menuliskan nilai asli ke README atau commit Git.
 
-Isi `frontend/.env.local`:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=anon-key
-NEXT_PUBLIC_API_URL=http://localhost:4000
-```
+| Variabel | Keterangan |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL proyek Supabase yang digunakan frontend |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key Supabase; jangan menggantinya dengan service-role key |
+| `NEXT_PUBLIC_API_URL` | Alamat backend FABRIX AI |
 
 ### 4. Siapkan Environment Backend
 
-```powershell
-Copy-Item backend/.env.example backend/.env
-```
+Konfigurasikan variabel backend berikut hanya melalui environment lokal atau secret manager. Nilai asli tidak boleh ditempatkan pada frontend, README, source code, atau commit Git.
 
-Isi `backend/.env`:
+| Variabel | Keterangan |
+| --- | --- |
+| `PORT` | Port server backend |
+| `FRONTEND_ORIGIN` | Origin frontend yang diizinkan oleh CORS |
+| `SUPABASE_URL` | URL proyek Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Credential privat Supabase khusus backend |
+| `ROBOFLOW_API_BASE` | Base URL layanan inference Roboflow |
+| `ROBOFLOW_API_KEY` | Private API key Roboflow khusus backend |
+| `ROBOFLOW_WORKSPACE` | Identitas workspace pemilik workflow |
+| `ROBOFLOW_WORKFLOW_ID` | Identitas workflow deteksi cacat |
+| `ALLOW_MOCK_INFERENCE` | Mengaktifkan atau menonaktifkan fallback data demo |
 
-```env
-PORT=4000
-FRONTEND_ORIGIN=http://localhost:3000
-SUPABASE_URL=https://project-id.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=service-role-key
-SUPABASE_JWT_SECRET=jwt-secret
-YOLO_SERVICE_URL=http://localhost:8000/predict
-YOLO_SERVICE_API_KEY=
-ALLOW_MOCK_INFERENCE=true
-```
-
-`SUPABASE_JWT_SECRET` disiapkan untuk pengembangan verifikasi JWT berikutnya. Implementasi saat ini memverifikasi bearer token dengan `supabase.auth.getUser()`.
+Backend memverifikasi sesi melalui `supabase.auth.getUser()`. Pada production, nonaktifkan fallback mock jika kegagalan layanan harus menghasilkan error dan simpan semua credential privat menggunakan secret manager platform deployment.
 
 ### 5. Instal Dependency
 
@@ -399,9 +415,9 @@ Buka aplikasi melalui [http://localhost:3000](http://localhost:3000). Status bac
 
 ### Hasil Analisis
 
-Halaman hasil hanya menampilkan field yang tersedia pada record analisis:
+Halaman hasil menampilkan field yang tersedia pada record analisis:
 
-- `detections`
+- `detections`, termasuk kelas, confidence, dan bounding box;
 - `microplastic_shedding_index`
 - `fabric_durability_index`
 - `composition`
@@ -409,7 +425,7 @@ Halaman hasil hanya menampilkan field yang tersedia pada record analisis:
 - `washing_condition`
 - `recommendation`
 
-Nilai yang tidak dikirim layanan AI tidak dibuat atau diperkirakan oleh frontend. Jika `result_source` bernilai `mock`, antarmuka dan PDF menampilkan label **DEMO RESULT**.
+Frontend tidak mengarang nilai yang kosong. Bounding box digambar dari koordinat Roboflow dan dimensi asli pada `raw_result.image_meta`. Indeks shedding dan durability dibentuk di backend menggunakan heuristik atas hasil deteksi. Jika `result_source` bernilai `mock`, antarmuka dan PDF menampilkan label **DEMO RESULT**.
 
 ### Laporan PDF
 
@@ -432,11 +448,7 @@ Development: http://localhost:4000
 Production:  belum dikonfigurasi
 ```
 
-Semua endpoint `/api/*` membutuhkan header berikut:
-
-```http
-Authorization: Bearer <supabase_access_token>
-```
+Semua endpoint `/api/*` hanya dapat diakses oleh pengguna yang memiliki sesi Supabase valid. Frontend aplikasi menangani pengiriman sesi secara otomatis; README tidak menyertakan token atau contoh header autentikasi.
 
 Endpoint `/health` tidak memerlukan autentikasi.
 
@@ -466,15 +478,6 @@ Endpoint `/health` tidak memerlukan autentikasi.
 | `structure` | JSON/String | Tidak | Data struktur jika tersedia |
 | `washing_condition` | JSON/String | Tidak | Kondisi pencucian jika tersedia |
 
-Contoh menggunakan `curl`:
-
-```bash
-curl -X POST http://localhost:4000/api/scan \
-  -H "Authorization: Bearer SUPABASE_ACCESS_TOKEN" \
-  -F "image=@fabric.jpg" \
-  -F "fabric_name=Kain Contoh"
-```
-
 Contoh response ringkas:
 
 ```json
@@ -484,12 +487,24 @@ Contoh response ringkas:
     "fabric_name": "Kain Contoh",
     "image_path": "user-id/nama-file.jpg",
     "result_source": "ai_service",
+    "detections": [
+      {
+        "class": "hole",
+        "confidence": 0.91,
+        "x": 320,
+        "y": 240,
+        "width": 84,
+        "height": 67
+      }
+    ],
+    "microplastic_shedding_index": 0.2,
+    "fabric_durability_index": 0.83,
     "created_at": "2026-09-03T00:00:00.000Z"
   }
 }
 ```
 
-Field hasil lainnya hanya tersedia bila dikirim oleh layanan analisis.
+Nilai pada contoh hanya menunjukkan bentuk data. Kelas, confidence, koordinat, dan indeks aktual bergantung pada hasil workflow dan perhitungan backend.
 
 ---
 
@@ -530,6 +545,8 @@ npm audit --audit-level=moderate
 | Koneksi tabel dan bucket Supabase | Berhasil |
 | Smoke test auth → profile → scan → detail → rename → history → comparison | Berhasil |
 | Pembersihan akun, record, dan gambar smoke test | Berhasil |
+| Koneksi nyata Roboflow Workflow dengan API key lokal | Berhasil; `result_source: "ai_service"` |
+| Normalisasi prediksi dan metadata gambar Roboflow | Berhasil |
 
 Repository belum memiliki unit test suite, end-to-end test suite permanen, atau angka test coverage. Tabel di atas mencatat verifikasi manual dan build yang benar-benar telah dijalankan, bukan coverage otomatis.
 
@@ -543,7 +560,7 @@ Repository belum memiliki unit test suite, end-to-end test suite permanen, atau 
 - Query analysis selalu difilter menggunakan `user_id` milik sesi terverifikasi.
 - RLS tetap diaktifkan sebagai lapisan perlindungan database.
 - Tipe gambar dibatasi pada JPEG, PNG, dan WebP dengan ukuran maksimum 8 MB.
-- File `.env` dan `.env.local` diabaikan oleh Git; file `.example` hanya berisi placeholder.
+- Semua file environment lokal diabaikan oleh Git; nilai credential harus disimpan melalui konfigurasi lokal atau secret manager dan tidak boleh dicantumkan dalam dokumentasi.
 - Bucket `fabric-images` masih public untuk prototipe lomba. Production sebaiknya menggunakan private bucket dan signed URL karena gambar kain perusahaan dapat bersifat sensitif.
 
 ---
@@ -561,20 +578,24 @@ Repository belum memiliki unit test suite, end-to-end test suite permanen, atau 
 - History, comparison 2–3 kain, dan passport
 - Penamaan ulang analysis
 - PDF export dari data tersimpan
-- Adapter backend untuk layanan YOLO eksternal
+- Adapter backend YOLO melalui Roboflow Workflow
+- Penyimpanan kelas, confidence, koordinat bounding box, dan metadata gambar
+- Overlay lokasi cacat pada halaman detail analysis dan passport
+- Perhitungan indeks heuristik berdasarkan hasil deteksi
 - Fallback mock yang diberi label demo
 - Konfigurasi lokal frontend dan backend
 
 ### Belum Tersedia atau Belum Final
 
 - Schema input final untuk What-If Optimizer
-- Server Python dan file model YOLO
+- Bobot model dan server inference lokal tidak disertakan karena workflow berjalan di Roboflow
+- Validasi ilmiah untuk heuristik shedding dan durability
 - URL deployment production
 - CI/CD dan monitoring production
 - Test suite otomatis serta laporan coverage
 - Bucket gambar private dengan signed URL
 
-Jika layanan AI belum aktif dan `ALLOW_MOCK_INFERENCE=true`, backend menggunakan fallback development. Hasil tersebut wajib diperlakukan sebagai data demo, bukan hasil model tervalidasi.
+Jika Roboflow belum dikonfigurasi atau tidak dapat dihubungi dan `ALLOW_MOCK_INFERENCE=true`, backend menggunakan fallback development. Hasil mock wajib diperlakukan sebagai data demo. Hasil Roboflow dan indeks heuristik tetap merupakan alat bantu pemeriksaan awal, bukan hasil pengujian laboratorium atau sertifikasi.
 
 ---
 
