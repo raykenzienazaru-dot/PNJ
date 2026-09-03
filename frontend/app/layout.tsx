@@ -25,7 +25,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FABRIX AI — Prediksi. Bandingkan. Optimalkan.",
+  title: "FABRIX AI",
   description:
     "Analisis kain berbasis kamera untuk mendukung keputusan material yang lebih cepat.",
   icons: {
