@@ -18,14 +18,17 @@ create table if not exists public.company_profiles (
 
 alter table public.company_profiles enable row level security;
 
+drop policy if exists "Users can view their own company profile" on public.company_profiles;
 create policy "Users can view their own company profile"
   on public.company_profiles for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can upsert their own company profile" on public.company_profiles;
 create policy "Users can upsert their own company profile"
   on public.company_profiles for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own company profile" on public.company_profiles;
 create policy "Users can update their own company profile"
   on public.company_profiles for update
   using (auth.uid() = user_id);
@@ -57,14 +60,23 @@ create index if not exists fabric_analyses_created_at_idx on public.fabric_analy
 
 alter table public.fabric_analyses enable row level security;
 
+drop policy if exists "Users can view their own analyses" on public.fabric_analyses;
 create policy "Users can view their own analyses"
   on public.fabric_analyses for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own analyses" on public.fabric_analyses;
 create policy "Users can insert their own analyses"
   on public.fabric_analyses for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own analyses" on public.fabric_analyses;
+create policy "Users can update their own analyses"
+  on public.fabric_analyses for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete their own analyses" on public.fabric_analyses;
 create policy "Users can delete their own analyses"
   on public.fabric_analyses for delete
   using (auth.uid() = user_id);
@@ -76,6 +88,7 @@ insert into storage.buckets (id, name, public)
 values ('fabric-images', 'fabric-images', true)
 on conflict (id) do nothing;
 
+drop policy if exists "Users can upload their own fabric images" on storage.objects;
 create policy "Users can upload their own fabric images"
   on storage.objects for insert
   with check (
@@ -83,6 +96,7 @@ create policy "Users can upload their own fabric images"
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
+drop policy if exists "Users can view their own fabric images" on storage.objects;
 create policy "Users can view their own fabric images"
   on storage.objects for select
   using (
@@ -91,5 +105,53 @@ create policy "Users can view their own fabric images"
   );
 
 -- Note: bucket is created as PUBLIC so image_url can be rendered directly in
--- the result popup without signed URLs. Switch to a private bucket + signed
+-- the result and passport pages without signed URLs. Switch to a private bucket + signed
 -- URLs before going to production if images are sensitive.
+
+-- =========================================================
+-- Profile lifecycle helpers
+-- =========================================================
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists company_profiles_set_updated_at on public.company_profiles;
+create trigger company_profiles_set_updated_at
+before update on public.company_profiles
+for each row execute procedure public.set_updated_at();
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.company_profiles (user_id, company_name, industry, contact_name)
+  values (
+    new.id,
+    coalesce(nullif(new.raw_user_meta_data ->> 'company_name', ''), 'My Company'),
+    nullif(new.raw_user_meta_data ->> 'industry', ''),
+    nullif(new.raw_user_meta_data ->> 'contact_name', '')
+  )
+  on conflict (user_id) do update set
+    company_name = excluded.company_name,
+    industry = excluded.industry,
+    contact_name = excluded.contact_name,
+    updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();

@@ -1,338 +1,96 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import { apiGet, apiPostForm, apiPostJson } from "@/lib/api";
-import CameraScanner from "@/components/CameraScanner";
-import ResultModal from "@/components/ResultModal";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import AppShell, { AppLoading } from "@/components/AppShell";
+import AnalysisCard from "@/components/AnalysisCard";
+import { apiGet } from "@/lib/api";
+import { useAppSession } from "@/lib/useAppSession";
+import type { Analysis } from "@/types/analysis";
 
-type Tab = "scan" | "history" | "compare";
+const RECENT_CUTOFF = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [companyName, setCompanyName] = useState<string>("");
-  const [tab, setTab] = useState<Tab>("scan");
-
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [fabricName, setFabricName] = useState("");
-  const [composition, setComposition] = useState("");
-  const [structure, setStructure] = useState("");
-  const [washing, setWashing] = useState("");
-  const [scanning, setScanning] = useState(false);
-  const [scanError, setScanError] = useState<string | null>(null);
-
-  const [history, setHistory] = useState<any[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-  const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
-  const [comparison, setComparison] = useState<any[] | null>(null);
-
-  const [activeResult, setActiveResult] = useState<any | null>(null);
+  const auth = useAppSession();
+  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        router.replace("/login");
-        return;
-      }
-      setCheckingAuth(false);
-      apiGet("/api/auth/me")
-        .then((res) => setCompanyName(res.profile?.company_name || res.user.email))
-        .catch(() => {});
-    });
-  }, [router]);
+    if (!auth.session) return;
+    apiGet("/api/scan/history")
+      .then((response) => setAnalyses(response.analyses || []))
+      .catch((requestError) => setError(requestError.message || "Dashboard data could not be loaded."))
+      .finally(() => setLoading(false));
+  }, [auth.session]);
 
-  const loadHistory = useCallback(async () => {
-    setLoadingHistory(true);
-    try {
-      const res = await apiGet("/api/scan/history");
-      setHistory(res.analyses || []);
-    } catch (err) {
-      // no-op, keep UI resilient
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, []);
+  const stats = useMemo(() => {
+    const recent = analyses.filter((item) => new Date(item.created_at).getTime() >= RECENT_CUTOFF).length;
+    const saved = new Set(analyses.map((item) => item.fabric_name.trim().toLowerCase())).size;
+    return [
+      ["Total Analyses", analyses.length],
+      ["Recent Analyses", recent],
+      ["Saved Fabrics", saved],
+    ] as const;
+  }, [analyses]);
 
-  useEffect(() => {
-    if (!checkingAuth) loadHistory();
-  }, [checkingAuth, loadHistory]);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace("/");
-  }
-
-  async function handleScan() {
-    if (!imageFile) {
-      setScanError("Ambil atau unggah gambar kain terlebih dahulu.");
-      return;
-    }
-    setScanning(true);
-    setScanError(null);
-
-    try {
-      const form = new FormData();
-      form.append("image", imageFile);
-      form.append("fabric_name", fabricName || "Untitled Fabric");
-      if (composition) form.append("composition", JSON.stringify({ note: composition }));
-      if (structure) form.append("structure", JSON.stringify({ note: structure }));
-      if (washing) form.append("washing_condition", JSON.stringify({ note: washing }));
-
-      const res = await apiPostForm("/api/scan", form);
-      setActiveResult(res.analysis); // popup only — never shown inline
-      setImageFile(null);
-      setFabricName("");
-      setComposition("");
-      setStructure("");
-      setWashing("");
-      loadHistory();
-    } catch (err: any) {
-      setScanError(err.message || "Pemindaian gagal. Coba lagi.");
-    } finally {
-      setScanning(false);
-    }
-  }
-
-  function toggleCompare(id: string) {
-    setSelectedForCompare((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : prev.length < 5
-        ? [...prev, id]
-        : prev
-    );
-  }
-
-  async function runComparison() {
-    if (selectedForCompare.length < 2) return;
-    const res = await apiPostJson("/api/scan/compare", { ids: selectedForCompare });
-    setComparison(res.comparison || []);
-  }
-
-  if (checkingAuth) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-base">
-        <p className="font-mono text-xs text-muted">Memeriksa sesi...</p>
-      </main>
-    );
-  }
+  if (auth.loading) return <AppLoading />;
 
   return (
-    <main className="min-h-screen bg-base bg-weave">
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 border-b border-border bg-base/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <AppShell
+      title="Make smarter material decisions."
+      description="Capture a fabric, review the available analysis, and keep every result ready for your next decision."
+      profile={auth.profile}
+      email={auth.session?.user.email}
+      action={<Link href="/scan" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-white transition hover:bg-secondary">Scan Fabric</Link>}
+    >
+      {error && <p role="alert" className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">{error}</p>}
+
+      <section className="grid gap-4 sm:grid-cols-3">
+        {stats.map(([label, value]) => (
+          <article key={label} className="rounded-2xl border border-border bg-white p-5 shadow-card">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</p>
+            <p className="mt-3 font-display text-4xl font-semibold text-primary">{loading ? "—" : value}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="mt-8 rounded-3xl bg-deep p-6 text-white shadow-card sm:p-8">
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div>
-            <p className="font-display text-lg text-ink">
-              FABRIX <span className="text-gold">AI</span>
-            </p>
-            <p className="font-mono text-[11px] text-muted">{companyName}</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-sage">Primary workflow</p>
+            <h2 className="mt-3 font-display text-3xl font-semibold">Open camera. Capture fabric. Get insight.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-white/60">No multi-step form and no manual upload. FABRIX opens directly into a guided camera experience.</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-full border border-border px-4 py-2 font-body text-sm text-ink transition hover:border-gold"
-          >
-            Keluar
-          </button>
+          <Link href="/scan" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-deep transition hover:bg-pale">Start New Scan</Link>
         </div>
-      </header>
+      </section>
 
-      {/* Tabs */}
-      <div className="mx-auto max-w-6xl px-6 pt-6">
-        <div className="flex gap-2 border-b border-border">
-          {(
-            [
-              ["scan", "Pindai Kain"],
-              ["history", "Riwayat"],
-              ["compare", "Bandingkan"],
-            ] as [Tab, string][]
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`-mb-px border-b-2 px-4 py-3 font-body text-sm transition ${
-                tab === key
-                  ? "border-gold text-ink"
-                  : "border-transparent text-muted hover:text-ink"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      <section className="mt-10">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-semibold text-deep">Recent Analyses</h2>
+            <p className="mt-1 text-sm text-muted">Your latest saved material results.</p>
+          </div>
+          <Link href="/history" className="text-sm font-semibold text-primary">View all</Link>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        {tab === "scan" && (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            <CameraScanner onCapture={setImageFile} disabled={scanning} />
-
-            <div className="space-y-4">
-              <Field label="Nama kain / kandidat" value={fabricName} onChange={setFabricName} />
-              <Field
-                label="Komposisi serat (opsional)"
-                value={composition}
-                onChange={setComposition}
-                placeholder="mis. 80% cotton, 20% polyester"
-              />
-              <Field
-                label="Struktur / anyaman (opsional)"
-                value={structure}
-                onChange={setStructure}
-                placeholder="mis. plain weave, 200 gsm"
-              />
-              <Field
-                label="Kondisi pencucian (opsional)"
-                value={washing}
-                onChange={setWashing}
-                placeholder="mis. mesin, 30°C"
-              />
-
-              {scanError && (
-                <p className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 font-body text-sm text-ink">
-                  {scanError}
-                </p>
-              )}
-
-              <button
-                onClick={handleScan}
-                disabled={scanning}
-                className="w-full rounded-full bg-gold px-6 py-3 font-body text-sm font-medium text-base transition hover:bg-goldSoft disabled:opacity-60"
-              >
-                {scanning ? "Menganalisis..." : "Jalankan analisis"}
-              </button>
-              <p className="font-mono text-[11px] text-muted">
-                Hasil akan muncul pada jendela pop-up, bukan di halaman ini.
-              </p>
-            </div>
+        {loading ? (
+          <div className="mt-5 grid gap-5 md:grid-cols-3">
+            {[0, 1, 2].map((item) => <div key={item} className="h-72 animate-pulse rounded-2xl border border-border bg-white" />)}
+          </div>
+        ) : analyses.length > 0 ? (
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {analyses.slice(0, 3).map((analysis) => <AnalysisCard key={analysis.id} analysis={analysis} />)}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-2xl border border-dashed border-sage bg-white p-10 text-center">
+            <h3 className="font-display text-2xl font-semibold text-deep">No analyses yet.</h3>
+            <p className="mt-2 text-sm text-muted">Your first saved result will appear here.</p>
+            <Link href="/scan" className="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white">Analyze Your First Fabric</Link>
           </div>
         )}
-
-        {tab === "history" && (
-          <div>
-            {loadingHistory && <p className="font-mono text-xs text-muted">Memuat riwayat...</p>}
-            {!loadingHistory && history.length === 0 && (
-              <p className="font-body text-sm text-muted">
-                Belum ada analisis. Mulai dari tab &ldquo;Pindai Kain&rdquo;.
-              </p>
-            )}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {history.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveResult(item)}
-                  className="rounded-xl border border-border bg-surface p-4 text-left transition hover:border-gold"
-                >
-                  {item.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.image_url}
-                      alt={item.fabric_name}
-                      className="mb-3 h-32 w-full rounded-lg object-cover"
-                    />
-                  )}
-                  <p className="font-display text-base text-ink">{item.fabric_name}</p>
-                  <p className="mt-1 font-mono text-[11px] text-muted">
-                    {new Date(item.created_at).toLocaleDateString("id-ID")}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {tab === "compare" && (
-          <div>
-            <p className="font-body text-sm text-muted">
-              Pilih 2–5 hasil analisis dari riwayat untuk dibandingkan.
-            </p>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {history.map((item) => (
-                <label
-                  key={item.id}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
-                    selectedForCompare.includes(item.id)
-                      ? "border-gold bg-gold/10"
-                      : "border-border bg-surface"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedForCompare.includes(item.id)}
-                    onChange={() => toggleCompare(item.id)}
-                    className="accent-gold"
-                  />
-                  <span className="font-body text-sm text-ink">{item.fabric_name}</span>
-                </label>
-              ))}
-            </div>
-
-            <button
-              onClick={runComparison}
-              disabled={selectedForCompare.length < 2}
-              className="mt-6 rounded-full bg-gold px-6 py-3 font-body text-sm font-medium text-base transition hover:bg-goldSoft disabled:opacity-40"
-            >
-              Bandingkan
-            </button>
-
-            {comparison && (
-              <div className="mt-8 overflow-x-auto rounded-xl border border-border">
-                <table className="w-full border-collapse font-body text-sm">
-                  <thead>
-                    <tr className="bg-surface2 text-left text-muted">
-                      <th className="px-4 py-3 font-mono text-xs">Kain</th>
-                      <th className="px-4 py-3 font-mono text-xs">Shedding Index</th>
-                      <th className="px-4 py-3 font-mono text-xs">Durability Index</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparison.map((row) => (
-                      <tr key={row.id} className="border-t border-border">
-                        <td className="px-4 py-3 text-ink">{row.fabric_name}</td>
-                        <td className="px-4 py-3 text-gold">
-                          {row.microplastic_shedding_index?.toFixed(2) ?? "—"}
-                        </td>
-                        <td className="px-4 py-3 text-gold">
-                          {row.fabric_durability_index?.toFixed(2) ?? "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <ResultModal analysis={activeResult} onClose={() => setActiveResult(null)} />
-    </main>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="font-body text-xs text-muted">{label}</span>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-1.5 w-full rounded-lg border border-border bg-surface2 px-4 py-2.5 font-body text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold"
-      />
-    </label>
+      </section>
+    </AppShell>
   );
 }

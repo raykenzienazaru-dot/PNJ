@@ -2,6 +2,14 @@ import { supabase } from "./supabaseClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+async function readResponse(res: Response) {
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload.error || "The request could not be completed.");
+  }
+  return payload;
+}
+
 async function authHeader(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -10,9 +18,8 @@ async function authHeader(): Promise<Record<string, string>> {
 
 export async function apiGet(path: string) {
   const headers = await authHeader();
-  const res = await fetch(`${API_URL}${path}`, { headers });
-  if (!res.ok) throw new Error((await res.json()).error || res.statusText);
-  return res.json();
+  const res = await fetch(`${API_URL}${path}`, { headers, cache: "no-store" });
+  return readResponse(res);
 }
 
 export async function apiPostJson(path: string, body: unknown) {
@@ -22,8 +29,7 @@ export async function apiPostJson(path: string, body: unknown) {
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error((await res.json()).error || res.statusText);
-  return res.json();
+  return readResponse(res);
 }
 
 export async function apiPostForm(path: string, formData: FormData) {
@@ -33,6 +39,15 @@ export async function apiPostForm(path: string, formData: FormData) {
     headers,
     body: formData,
   });
-  if (!res.ok) throw new Error((await res.json()).error || res.statusText);
-  return res.json();
+  return readResponse(res);
+}
+
+export async function apiPatchJson(path: string, body: unknown) {
+  const headers = await authHeader();
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(body),
+  });
+  return readResponse(res);
 }

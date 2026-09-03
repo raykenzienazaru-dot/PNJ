@@ -39,6 +39,7 @@ router.post("/company-profile", requireAuth, async (req, res) => {
         company_name,
         industry: industry || null,
         contact_name: contact_name || null,
+        updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
     )
@@ -49,7 +50,7 @@ router.post("/company-profile", requireAuth, async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 
-  return res.status(201).json({ profile: data });
+  return res.status(200).json({ profile: data });
 });
 
 module.exports = router;

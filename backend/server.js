@@ -37,6 +37,12 @@ app.use((req, res) => {
 // Central error handler (e.g. multer errors)
 app.use((err, req, res, next) => {
   console.error("[unhandled]", err);
+  if (err?.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ error: "Image exceeds the 8MB limit" });
+  }
+  if (err?.message?.startsWith("Only JPEG")) {
+    return res.status(400).json({ error: err.message });
+  }
   res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
 

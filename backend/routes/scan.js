@@ -1,18 +1,19 @@
 const express = require("express");
 const multer = require("multer");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID } = require("node:crypto");
 const { requireAuth } = require("../middleware/authMiddleware");
 const { supabaseAdmin } = require("../services/supabaseClient");
 const { runInference } = require("../services/yoloService");
 
 const router = express.Router();
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024 }, // 8MB
   fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed"));
+    if (!ALLOWED_IMAGE_TYPES.has(file.mimetype)) {
+      return cb(new Error("Only JPEG, PNG, and WebP images are allowed"));
     }
     cb(null, true);
   },
@@ -22,6 +23,7 @@ const STORAGE_BUCKET = "fabric-images";
 
 // POST /api/scan  (multipart/form-data: image, composition, structure, washing_condition, fabric_name)
 router.post("/", requireAuth, upload.single("image"), async (req, res) => {
+  let storedFilePath = null;
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Field 'image' (file) is required" });
@@ -36,7 +38,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
     };
 
     // 1. Upload the captured/uploaded image to Supabase Storage
-    const filePath = `${req.user.id}/${uuidv4()}-${sanitizeFilename(
+    const filePath = `${req.user.id}/${randomUUID()}-${sanitizeFilename(
       req.file.originalname || "capture.jpg"
     )}`;
 
@@ -51,6 +53,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
       console.error("[scan] storage upload failed:", uploadError.message);
       return res.status(500).json({ error: "Failed to store fabric image" });
     }
+    storedFilePath = filePath;
 
     const { data: publicUrlData } = supabaseAdmin.storage
       .from(STORAGE_BUCKET)
@@ -84,12 +87,16 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
 
     if (insertError) {
       console.error("[scan] insert failed:", insertError.message);
+      await supabaseAdmin.storage.from(STORAGE_BUCKET).remove([filePath]);
       return res.status(500).json({ error: "Failed to save analysis result" });
     }
 
     return res.status(201).json({ analysis });
   } catch (err) {
     console.error("[scan] unexpected error:", err.message);
+    if (storedFilePath) {
+      await supabaseAdmin.storage.from(STORAGE_BUCKET).remove([storedFilePath]);
+    }
     return res.status(500).json({ error: "Scan failed", detail: err.message });
   }
 });
@@ -120,11 +127,11 @@ router.get("/:id", requireAuth, async (req, res) => {
   return res.json({ analysis: data });
 });
 
-// POST /api/scan/compare  { ids: [uuid, ...] }  (2-5 items)
+// POST /api/scan/compare  { ids: [uuid, ...] }  (2-3 items)
 router.post("/compare", requireAuth, async (req, res) => {
-  const { ids } = req.body;
-  if (!Array.isArray(ids) || ids.length < 2 || ids.length > 5) {
-    return res.status(400).json({ error: "Provide between 2 and 5 analysis ids" });
+  const ids = Array.isArray(req.body.ids) ? [...new Set(req.body.ids)] : [];
+  if (ids.length < 2 || ids.length > 3) {
+    return res.status(400).json({ error: "Provide between 2 and 3 unique analysis ids" });
   }
 
   const { data, error } = await supabaseAdmin
@@ -135,6 +142,30 @@ router.post("/compare", requireAuth, async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   return res.json({ comparison: data });
+});
+
+// PATCH /api/scan/:id  { fabric_name }
+// The analysis is persisted during scanning; this endpoint lets the user name it afterwards.
+router.patch("/:id", requireAuth, async (req, res) => {
+  const fabricName = typeof req.body.fabric_name === "string"
+    ? req.body.fabric_name.trim()
+    : "";
+
+  if (!fabricName || fabricName.length > 120) {
+    return res.status(400).json({ error: "fabric_name must contain between 1 and 120 characters" });
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("fabric_analyses")
+    .update({ fabric_name: fabricName })
+    .eq("id", req.params.id)
+    .eq("user_id", req.user.id)
+    .select()
+    .maybeSingle();
+
+  if (error) return res.status(500).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: "Analysis not found" });
+  return res.json({ analysis: data });
 });
 
 // POST /api/scan/:id/whatif  { composition, structure, washing_condition }

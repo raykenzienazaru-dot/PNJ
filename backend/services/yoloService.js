@@ -35,20 +35,8 @@ function mockInference(imageBuffer) {
     detections: [
       {
         class: detectedClass,
-        confidence: rand(0.72, 0.97, 1),
-        bbox: [
-          rand(0, 0.2, 2),
-          rand(0, 0.2, 3),
-          rand(0.6, 0.95, 4),
-          rand(0.6, 0.95, 5),
-        ],
       },
     ],
-    visual_features_summary: {
-      texture_uniformity: rand(0.4, 0.95, 6),
-      surface_roughness: rand(0.1, 0.8, 7),
-      weave_pattern_confidence: rand(0.5, 0.9, 8),
-    },
     prediction: {
       microplastic_shedding_index: rand(0.1, 0.9, 9),
       fabric_durability_index: rand(0.3, 0.95, 10),
@@ -101,7 +89,7 @@ async function runInference(imageBuffer, fabricData = {}) {
     }
 
     const result = await response.json();
-    return { source: "ai_service", ...result };
+    return { ...result, source: "ai_service" };
   } catch (err) {
     console.error("[yoloService] AI Service call failed:", err.message);
     if (ALLOW_MOCK_INFERENCE) {

@@ -17,13 +17,14 @@ html {
 }
 
 body {
-  background-color: #0a0c0b;
-  color: #edeae2;
+  margin: 0;
+  background-color: #f7faf8;
+  color: #051f20;
 }
 
 ::selection {
-  background: #c6a15b;
-  color: #0a0c0b;
+  background: #8eb69b;
+  color: #051f20;
 }
 
 /* visible keyboard focus */
@@ -32,7 +33,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #c6a15b;
+  outline: 2px solid #235347;
   outline-offset: 2px;
 }
 
@@ -50,7 +51,7 @@ select:focus-visible {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #c6a15b, transparent);
+  background: linear-gradient(90deg, transparent, #daf1de, transparent);
   animation: scan-move 2.4s ease-in-out infinite;
 }
 
@@ -63,5 +64,19 @@ select:focus-visible {
 
 .thread-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #2a2e2a 20%, #2a2e2a 80%, transparent);
+  background: linear-gradient(90deg, transparent, #8eb69b 20%, #8eb69b 80%, transparent);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea {
+  color-scheme: light;
 }
