@@ -152,7 +152,7 @@ Foto dari kamera dikirim ke backend dan dianalisis oleh workflow deteksi objek. 
 | CORS | `2.8.5` | Pembatasan origin frontend |
 | Morgan | `1.10.0` | Log permintaan saat pengembangan |
 | node-fetch | `2.7.0` | Komunikasi backend dengan layanan AI |
-| Roboflow Workflow | Hosted inference | Menjalankan workflow `fabric-defect-detection_2025-tw6ok-ll8oy` dan mengembalikan prediksi objek |
+| Roboflow Workflow | Hosted inference | Menerima gambar kain dan mengembalikan prediksi visual |
 | Adapter YOLO | Service backend | Mengubah gambar ke base64, memanggil Roboflow, menormalisasi prediksi, dan menyiapkan fallback mock |
 
 ### Alasan Pemilihan Teknologi
@@ -191,30 +191,17 @@ flowchart LR
     MOCK --> BE
 ```
 
-### Fungsi YOLO dan Roboflow dalam FABRIX AI
+### AI Fabric Analysis
 
-Dalam MVP FABRIX AI, fungsi utama YOLO adalah membantu quality control awal dengan mendeteksi dan menunjukkan lokasi indikasi cacat pada foto kain. Contohnya mencakup lubang, noda, sobekan, pilling, benang tertarik, perubahan warna, atau kelas cacat lain yang dikenali oleh model. Tujuannya bukan menggantikan keputusan operator, tetapi mengarahkan perhatian operator ke area yang perlu diperiksa ulang sebelum kain dipotong atau dijahit.
+FABRIX AI menggunakan Roboflow Workflow untuk melakukan analisis visual
+terhadap kain yang ditangkap langsung melalui kamera perangkat.
 
-Model diakses melalui Roboflow Workflow, sedangkan [`backend/services/yoloService.js`](backend/services/yoloService.js) menjadi adapter antara backend FABRIX AI dan layanan tersebut. Repository hanya menyimpan kode integrasi dan ringkasan alur; definisi JSON workflow lengkap, token, dan credential layanan tidak disertakan.
+Workflow menerima gambar kain sebagai input (`InferenceImage`) dan
+menghasilkan `predictions` yang digunakan aplikasi untuk menampilkan
+hasil analisis.
 
-Adapter membaca identitas workspace dan workflow dari environment backend, mengirim input gambar, lalu mengambil output `predictions` tanpa mengekspos konfigurasi privat ke frontend.
-
-Alurnya adalah sebagai berikut:
-
-1. Kamera frontend menghasilkan gambar kain.
-2. Backend menerima dan memvalidasi gambar.
-3. Adapter mengubah gambar menjadi base64 dan mengirimnya ke endpoint Roboflow Workflow menggunakan `ROBOFLOW_API_KEY`.
-4. Respons Roboflow dinormalisasi menjadi daftar deteksi berisi `class`, `class_id`, `confidence`, `x`, `y`, `width`, `height`, dan `detection_id`.
-5. Backend menghitung `microplastic_shedding_index` dan `fabric_durability_index` menggunakan bobot heuristik dari kelas cacat dan confidence.
-6. Deteksi, indeks, rekomendasi, metadata gambar, identitas workflow, dan respons mentah disimpan pada record analysis.
-7. Frontend menggunakan [`frontend/components/DetectionOverlay.tsx`](frontend/components/DetectionOverlay.tsx) untuk menggambar bounding box dan label confidence di atas gambar hasil scan.
-8. Jika API key tidak tersedia atau request gagal dan `ALLOW_MOCK_INFERENCE=true`, backend memakai fallback pengembangan dengan `result_source: "mock"`.
-
-Output utama YOLO untuk fungsi quality control adalah kelas cacat, confidence, dan bounding box. `microplastic_shedding_index` serta `fabric_durability_index` bukan output langsung model YOLO; keduanya adalah fitur pendukung eksperimental yang dihitung menggunakan heuristik backend.
-
-Repository ini tidak menyertakan server Python atau bobot model YOLO karena inference dijalankan oleh Roboflow. Hasil dengan `result_source: "ai_service"` berasal dari workflow Roboflow, sedangkan hasil dengan `result_source: "mock"` hanya data demonstrasi. Semua indikasi cacat perlu dikonfirmasi kembali oleh operator QC.
-
-Referensi integrasi tersedia pada [dokumentasi deployment Roboflow Workflow](https://docs.roboflow.com/workflows/deploy-a-workflow).
+Credential layanan AI disimpan melalui environment variables dan tidak
+disertakan dalam repository.
 
 ### Alur Scan
 
@@ -340,35 +327,21 @@ cd PNJ
 
 SQL tersebut juga menambahkan RLS, trigger `updated_at`, serta trigger pembuatan profil setelah user terdaftar.
 
-### 3. Siapkan Environment Frontend
+### 3. Siapkan Environment
 
-Konfigurasikan variabel berikut melalui environment lokal atau secret manager pada platform deployment. Jangan menuliskan nilai asli ke README atau commit Git.
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-| Variabel | Keterangan |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL proyek Supabase yang digunakan frontend |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key Supabase; jangan menggantinya dengan service-role key |
-| `NEXT_PUBLIC_API_URL` | Alamat backend FABRIX AI |
+# Roboflow
+ROBOFLOW_WORKFLOW_URL=
+ROBOFLOW_API_KEY=
+```
 
-### 4. Siapkan Environment Backend
+Isi seluruh nilai hanya pada environment lokal atau secret manager platform deployment. Jangan menyertakan credential asli dalam README maupun commit Git.
 
-Konfigurasikan variabel backend berikut hanya melalui environment lokal atau secret manager. Nilai asli tidak boleh ditempatkan pada frontend, README, source code, atau commit Git.
-
-| Variabel | Keterangan |
-| --- | --- |
-| `PORT` | Port server backend |
-| `FRONTEND_ORIGIN` | Origin frontend yang diizinkan oleh CORS |
-| `SUPABASE_URL` | URL proyek Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | Credential privat Supabase khusus backend |
-| `ROBOFLOW_API_BASE` | Base URL layanan inference Roboflow |
-| `ROBOFLOW_API_KEY` | Private API key Roboflow khusus backend |
-| `ROBOFLOW_WORKSPACE` | Identitas workspace pemilik workflow |
-| `ROBOFLOW_WORKFLOW_ID` | Identitas workflow deteksi cacat |
-| `ALLOW_MOCK_INFERENCE` | Mengaktifkan atau menonaktifkan fallback data demo |
-
-Backend memverifikasi sesi melalui `supabase.auth.getUser()`. Pada production, nonaktifkan fallback mock jika kegagalan layanan harus menghasilkan error dan simpan semua credential privat menggunakan secret manager platform deployment.
-
-### 5. Instal Dependency
+### 4. Instal Dependency
 
 ```powershell
 cd backend
@@ -378,7 +351,7 @@ cd ../frontend
 npm ci
 ```
 
-### 6. Jalankan Mode Development
+### 5. Jalankan Mode Development
 
 Terminal backend:
 
@@ -545,8 +518,6 @@ npm audit --audit-level=moderate
 | Koneksi tabel dan bucket Supabase | Berhasil |
 | Smoke test auth → profile → scan → detail → rename → history → comparison | Berhasil |
 | Pembersihan akun, record, dan gambar smoke test | Berhasil |
-| Koneksi nyata Roboflow Workflow dengan API key lokal | Berhasil; `result_source: "ai_service"` |
-| Normalisasi prediksi dan metadata gambar Roboflow | Berhasil |
 
 Repository belum memiliki unit test suite, end-to-end test suite permanen, atau angka test coverage. Tabel di atas mencatat verifikasi manual dan build yang benar-benar telah dijalankan, bukan coverage otomatis.
 
