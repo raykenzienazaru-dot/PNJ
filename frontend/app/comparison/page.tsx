@@ -6,7 +6,7 @@ import AnalysisCard from "@/components/AnalysisCard";
 import { apiGet, apiPostJson } from "@/lib/api";
 import { useAppSession } from "@/lib/useAppSession";
 import type { Analysis } from "@/types/analysis";
-import { analysisDetectionLabel, fabricDisplayName } from "@/types/analysis";
+import { analysisDetectionLabel } from "@/types/analysis";
 
 export default function ComparisonPage() {
   const auth = useAppSession();
@@ -26,7 +26,7 @@ export default function ComparisonPage() {
         setHistory(analyses);
         if (preset && analyses.some((item) => item.id === preset)) setSelected([preset]);
       })
-      .catch((requestError) => setError(requestError.message || "Analisis tersimpan belum dapat dimuat."))
+      .catch((requestError) => setError(requestError.message || "Saved analyses could not be loaded."))
       .finally(() => setLoading(false));
   }, [auth.session]);
 
@@ -48,18 +48,18 @@ export default function ComparisonPage() {
       const returned: Analysis[] = response.comparison || [];
       setComparison(selected.map((id) => returned.find((item) => item.id === id)).filter(Boolean) as Analysis[]);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Perbandingan belum dapat disiapkan.");
+      setError(requestError instanceof Error ? requestError.message : "Comparison could not be prepared.");
     } finally {
       setComparing(false);
     }
   }
 
-  if (auth.loading) return <AppLoading label="Menyiapkan perbandingan..." />;
+  if (auth.loading) return <AppLoading label="Loading comparison..." />;
 
   return (
     <AppShell
-      title="Bandingkan kain dengan lebih mudah."
-      description="Pilih dua atau tiga analisis tersimpan, lalu tinjau nilainya secara berdampingan. FABRIX tidak menentukan pemenang secara otomatis."
+      title="Compare materials. Decide with confidence."
+      description="Select two or three saved analyses and review their available values side by side. FABRIX does not declare an automatic winner."
       profile={auth.profile}
       email={auth.session?.user.email}
     >
@@ -67,11 +67,11 @@ export default function ComparisonPage() {
 
       <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-border bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-semibold text-deep">{selected.length} dari 3 dipilih</p>
-          <p className="mt-1 text-xs text-muted">Pilih minimal dua analisis.</p>
+          <p className="font-semibold text-deep">{selected.length} of 3 selected</p>
+          <p className="mt-1 text-xs text-muted">Choose at least two analyses.</p>
         </div>
         <button type="button" onClick={compare} disabled={selected.length < 2 || comparing} className="min-h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-secondary disabled:opacity-45">
-          {comparing ? "Menyiapkan Perbandingan..." : "Bandingkan Pilihan"}
+          {comparing ? "Preparing Comparison..." : "Compare Selected"}
         </button>
       </div>
 
@@ -82,13 +82,13 @@ export default function ComparisonPage() {
           {history.map((analysis) => <AnalysisCard key={analysis.id} analysis={analysis} selectable selected={selected.includes(analysis.id)} onSelect={() => toggle(analysis.id)} />)}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-sage bg-white p-10 text-center text-sm text-muted">Simpan minimal dua hasil analisis untuk mulai membandingkan.</div>
+        <div className="rounded-2xl border border-dashed border-sage bg-white p-10 text-center text-sm text-muted">At least two saved analyses are required for comparison.</div>
       )}
 
       {comparison && comparison.length >= 2 && (
         <section className="mt-10">
-          <h2 className="font-display text-3xl font-semibold text-deep">Hasil Perbandingan</h2>
-          <p className="mt-2 text-sm text-muted">Nilai ditampilkan sesuai data yang tersimpan pada setiap analisis.</p>
+          <h2 className="font-display text-3xl font-semibold text-deep">Comparison Results</h2>
+          <p className="mt-2 text-sm text-muted">Values are shown exactly as stored in each analysis.</p>
           <div className="mt-5 overflow-x-auto pb-3">
             <div className="grid min-w-[44rem] gap-4" style={{ gridTemplateColumns: `repeat(${comparison.length}, minmax(13rem, 1fr))` }}>
               {comparison.map((analysis) => (
@@ -96,14 +96,13 @@ export default function ComparisonPage() {
                   <div className="aspect-[16/10] bg-surface2">
                     {analysis.image_url && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={analysis.image_url} alt={fabricDisplayName(analysis.fabric_name)} className="h-full w-full object-cover" />
+                      <img src={analysis.image_url} alt={analysis.fabric_name} className="h-full w-full object-cover" />
                     )}
                   </div>
                   <div className="p-5">
-                    <h3 className="font-display text-xl font-semibold text-deep">{fabricDisplayName(analysis.fabric_name)}</h3>
-                    <ComparisonRow label="Indeks Pelepasan Mikroplastik" value={analysis.microplastic_shedding_index?.toFixed(2) ?? "Tidak tersedia"} />
-                    <ComparisonRow label="Indeks Ketahanan Kain" value={analysis.fabric_durability_index?.toFixed(2) ?? "Tidak tersedia"} />
-                    <ComparisonRow label="Karakteristik Terdeteksi" value={analysisDetectionLabel(analysis) || "Tidak tersedia"} />
+                    <h3 className="font-display text-xl font-semibold text-deep">{analysis.fabric_name}</h3>
+                    <ComparisonRow label="Fabric Durability Index" value={analysis.fabric_durability_index?.toFixed(2) ?? "Not Available"} />
+                    <ComparisonRow label="Detected Characteristic" value={analysisDetectionLabel(analysis) || "Not Available"} />
                   </div>
                 </article>
               ))}

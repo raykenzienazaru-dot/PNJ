@@ -25,13 +25,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FABRIX AI",
+  title: "FABRIX AI — Predict. Compare. Optimize.",
   description:
-    "Analisis kain berbasis kamera untuk mendukung keputusan material yang lebih cepat.",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
+    "Camera-based fabric analysis that supports faster material decisions.",
 };
 
 export default function RootLayout({
@@ -40,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
       <body className="font-body antialiased">{children}</body>
     </html>
   );

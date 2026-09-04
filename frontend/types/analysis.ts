@@ -10,7 +10,6 @@ export type Analysis = {
   structure: unknown | null;
   washing_condition: unknown | null;
   detections: unknown | null;
-  microplastic_shedding_index: number | null;
   fabric_durability_index: number | null;
   recommendation: unknown | null;
   raw_result: unknown | null;
@@ -28,33 +27,6 @@ export type CompanyProfile = {
   updated_at: string;
 };
 
-const DISPLAY_LABELS: Record<string, string> = {
-  ai_service: "Layanan AI",
-  mock: "Data demo",
-  unknown: "Tidak diketahui",
-  hole: "Lubang",
-  stain: "Noda",
-  tear: "Sobekan",
-  pilling: "Bulu kain (pilling)",
-  snag: "Benang tertarik",
-  discoloration: "Perubahan warna",
-  loose_thread: "Benang lepas",
-  defect: "Cacat",
-  class: "Kelas cacat",
-  class_id: "ID kelas",
-  confidence: "Tingkat keyakinan",
-  detection_id: "ID deteksi",
-  width: "Lebar",
-  height: "Tinggi",
-  material: "Material",
-  care: "Perawatan",
-  alternative_composition: "Alternatif komposisi",
-  note: "Catatan",
-  provider: "Penyedia",
-  workflow_id: "ID workflow",
-  image_meta: "Metadata gambar",
-};
-
 export function hasValue(value: unknown): boolean {
   if (value === null || value === undefined || value === "") return false;
   if (Array.isArray(value)) return value.length > 0;
@@ -63,9 +35,8 @@ export function hasValue(value: unknown): boolean {
 }
 
 export function formatValue(value: unknown): string {
-  if (!hasValue(value)) return "Tidak tersedia";
-  if (typeof value === "boolean") return value ? "Ya" : "Tidak";
-  if (typeof value === "string" || typeof value === "number") {
+  if (!hasValue(value)) return "Not Available";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
     return String(value);
   }
   if (Array.isArray(value)) {
@@ -77,17 +48,9 @@ export function formatValue(value: unknown): string {
 }
 
 export function humanize(value: string): string {
-  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
-  if (DISPLAY_LABELS[normalized]) return DISPLAY_LABELS[normalized];
-
   return value
     .replace(/[_-]+/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-export function fabricDisplayName(value: string): string {
-  const cleaned = value.trim();
-  return !cleaned || cleaned.toLowerCase() === "untitled fabric" ? "Kain tanpa nama" : cleaned;
 }
 
 export function analysisDetectionLabel(analysis: Analysis): string | null {

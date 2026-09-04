@@ -5,8 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { apiPostJson } from "@/lib/api";
-import { messageInIndonesian } from "@/lib/messages";
-import BrandLogo from "@/components/BrandLogo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -25,7 +23,7 @@ export default function RegisterPage() {
     setIsError(false);
     if (form.password !== form.confirm) {
       setIsError(true);
-      setMessage("Konfirmasi kata sandi belum sama.");
+      setMessage("Passwords do not match.");
       return;
     }
 
@@ -53,82 +51,46 @@ export default function RegisterPage() {
         router.push("/dashboard");
         router.refresh();
       } else {
-        setMessage("Akun berhasil dibuat. Periksa email untuk melakukan konfirmasi, lalu masuk.");
+        setMessage("Account created. Check your email to confirm your address, then sign in.");
       }
     } catch (error) {
       setIsError(true);
-      setMessage(messageInIndonesian(error instanceof Error ? error.message : null, "Pendaftaran belum dapat diselesaikan."));
+      setMessage(error instanceof Error ? error.message : "Registration could not be completed.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="grid min-h-screen bg-base lg:grid-cols-2">
-      <section className="hidden bg-deep p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <Link href="/" aria-label="FABRIX AI — Halaman utama"><BrandLogo size="md" /></Link>
-
-        <div className="max-w-lg">
-          <p className="font-mono text-xs uppercase tracking-[0.22em] text-sage">Foto. Deteksi. Dokumentasikan.</p>
-          <h1 className="mt-5 font-display text-5xl font-semibold leading-tight">
-            Mulai dari satu foto kain yang jelas.
-          </h1>
-          <p className="mt-5 leading-7 text-white/60">
-            Buat ruang kerja untuk menyimpan pemeriksaan, melihat riwayat, membandingkan kain, dan mengunduh laporan.
-          </p>
-          <div className="mt-9 grid gap-3 text-sm text-white/75">
-            {["Analisis langsung dari kamera", "Riwayat pemeriksaan milikmu", "Laporan siap diunduh"].map((item) => (
-              <p key={item} className="flex items-center gap-3">
-                <span className="h-2 w-2 rounded-full bg-sage" />
-                {item}
-              </p>
-            ))}
+    <main className="min-h-screen bg-base px-5 py-10 sm:px-6">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-border bg-white shadow-card lg:grid-cols-[0.8fr,1.2fr]">
+        <section className="bg-deep p-8 text-white sm:p-10">
+          <Link href="/" className="font-display text-2xl font-semibold">FABRIX <span className="text-sage">AI</span></Link>
+          <h1 className="mt-16 font-display text-4xl font-semibold">Start with one clear fabric capture.</h1>
+          <p className="mt-4 text-sm leading-7 text-white/60">Create your company workspace to save analyses, build a reusable history, compare materials, and export reports.</p>
+          <div className="mt-10 space-y-4 text-sm text-white/75">
+            {["Camera-first analysis", "User-owned analysis history", "PDF-ready saved results"].map((item) => <p key={item} className="flex items-center gap-3"><span className="h-2 w-2 rounded-full bg-sage" />{item}</p>)}
           </div>
-        </div>
+        </section>
 
-        <p className="text-xs text-white/35">Temukan cacat sebelum kain dipotong.</p>
-      </section>
-
-      <section className="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
-        <div className="w-full max-w-2xl">
-          <Link href="/" aria-label="FABRIX AI — Halaman utama" className="lg:hidden"><BrandLogo variant="dark" /></Link>
-          <p className="mt-10 font-mono text-xs uppercase tracking-[0.18em] text-secondary lg:mt-0">Buat ruang kerja</p>
-          <h2 className="mt-3 font-display text-4xl font-semibold text-deep">Daftarkan usahamu</h2>
-          <p className="mt-3 text-sm leading-6 text-muted">Isi data singkat berikut untuk mulai memeriksa kain.</p>
-
+        <section className="p-7 sm:p-10">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-secondary">Create workspace</p>
+          <h2 className="mt-3 font-display text-3xl font-semibold text-deep">Register your company</h2>
           <form onSubmit={submit} className="mt-8 grid gap-5 sm:grid-cols-2">
-            <Field label="Nama lengkap" value={form.contactName} onChange={(value) => update("contactName", value)} />
-            <Field label="Nama usaha / organisasi" value={form.companyName} onChange={(value) => update("companyName", value)} />
-            <Field label="Bidang usaha (opsional)" value={form.industry} onChange={(value) => update("industry", value)} required={false} />
-            <Field label="Email kerja" type="email" value={form.email} onChange={(value) => update("email", value)} />
-            <Field label="Kata sandi" type="password" value={form.password} onChange={(value) => update("password", value)} minLength={6} />
-            <Field label="Konfirmasi kata sandi" type="password" value={form.confirm} onChange={(value) => update("confirm", value)} minLength={6} />
-            {message && (
-              <p
-                role={isError ? "alert" : "status"}
-                className={`rounded-xl border px-4 py-3 text-sm sm:col-span-2 ${
-                  isError ? "border-red-200 bg-red-50 text-red-700" : "border-sage bg-pale text-primary"
-                }`}
-              >
-                {message}
-              </p>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="min-h-12 rounded-xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-secondary disabled:opacity-60 sm:col-span-2"
-            >
-              {loading ? "Membuat akun..." : "Buat akun"}
+            <Field label="Full Name" value={form.contactName} onChange={(value) => update("contactName", value)} />
+            <Field label="Company / Organization" value={form.companyName} onChange={(value) => update("companyName", value)} />
+            <Field label="Industry (optional)" value={form.industry} onChange={(value) => update("industry", value)} required={false} />
+            <Field label="Work Email" type="email" value={form.email} onChange={(value) => update("email", value)} />
+            <Field label="Password" type="password" value={form.password} onChange={(value) => update("password", value)} minLength={6} />
+            <Field label="Confirm Password" type="password" value={form.confirm} onChange={(value) => update("confirm", value)} minLength={6} />
+            {message && <p role={isError ? "alert" : "status"} className={`sm:col-span-2 rounded-xl border px-4 py-3 text-sm ${isError ? "border-red-200 bg-red-50 text-red-700" : "border-sage bg-pale text-primary"}`}>{message}</p>}
+            <button type="submit" disabled={loading} className="min-h-12 rounded-xl bg-primary px-6 text-sm font-semibold text-white transition hover:bg-secondary disabled:opacity-60 sm:col-span-2">
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
-          <p className="mt-6 text-sm text-muted">
-            Sudah punya akun?{" "}
-            <Link href="/login" className="font-semibold text-primary underline decoration-sage underline-offset-4">
-              Masuk
-            </Link>
-          </p>
-        </div>
-      </section>
+          <p className="mt-6 text-sm text-muted">Already have an account? <Link href="/login" className="font-semibold text-primary underline decoration-sage underline-offset-4">Sign in</Link></p>
+        </section>
+      </div>
     </main>
   );
 }

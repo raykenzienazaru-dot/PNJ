@@ -59,7 +59,7 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
       .from(STORAGE_BUCKET)
       .getPublicUrl(filePath);
 
-    // 2. Run object-detection inference through the configured Roboflow Workflow.
+    // 2. Run inference via the Roboflow "fabric-defect-detection" workflow
     const inferenceResult = await runInference(req.file.buffer, fabricData);
 
     // 3. Persist the analysis result
@@ -67,15 +67,13 @@ router.post("/", requireAuth, upload.single("image"), async (req, res) => {
       .from("fabric_analyses")
       .insert({
         user_id: req.user.id,
-        fabric_name: fabric_name || "Kain tanpa nama",
+        fabric_name: fabric_name || "Untitled Fabric",
         image_path: filePath,
         image_url: publicUrlData?.publicUrl || null,
         composition: fabricData.composition,
         structure: fabricData.structure,
         washing_condition: fabricData.washing_condition,
         detections: inferenceResult.detections || null,
-        microplastic_shedding_index:
-          inferenceResult.prediction?.microplastic_shedding_index ?? null,
         fabric_durability_index:
           inferenceResult.prediction?.fabric_durability_index ?? null,
         recommendation: inferenceResult.recommendation || null,
@@ -208,8 +206,6 @@ router.post("/:id/whatif", requireAuth, async (req, res) => {
         structure: fabricData.structure,
         washing_condition: fabricData.washing_condition,
         detections: inferenceResult.detections || null,
-        microplastic_shedding_index:
-          inferenceResult.prediction?.microplastic_shedding_index ?? null,
         fabric_durability_index:
           inferenceResult.prediction?.fabric_durability_index ?? null,
         recommendation: inferenceResult.recommendation || null,

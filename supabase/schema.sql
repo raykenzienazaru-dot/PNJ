@@ -39,14 +39,13 @@ create policy "Users can update their own company profile"
 create table if not exists public.fabric_analyses (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  fabric_name text not null default 'Kain tanpa nama',
+  fabric_name text not null default 'Untitled Fabric',
   image_path text not null,
   image_url text,
   composition jsonb,
   structure jsonb,
   washing_condition jsonb,
   detections jsonb,
-  microplastic_shedding_index numeric,
   fabric_durability_index numeric,
   recommendation jsonb,
   raw_result jsonb,
@@ -138,7 +137,7 @@ begin
   insert into public.company_profiles (user_id, company_name, industry, contact_name)
   values (
     new.id,
-    coalesce(nullif(new.raw_user_meta_data ->> 'company_name', ''), 'Perusahaan Saya'),
+    coalesce(nullif(new.raw_user_meta_data ->> 'company_name', ''), 'My Company'),
     nullif(new.raw_user_meta_data ->> 'industry', ''),
     nullif(new.raw_user_meta_data ->> 'contact_name', '')
   )
